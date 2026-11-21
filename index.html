@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Конструктор документов — Typst</title>
+  </head>
+  <body>
+    <main>
+      <h1>Конструктор документов</h1>
+      <p class="sub">
+        Выберите шаблон, заполните нужные поля, а пустые оставьте — в PDF будут
+        прочерки для ручного заполнения. Готовый документ собирается прямо в
+        браузере через Typst (WASM), без сервера.
+      </p>
+
+      <label for="template">Шаблон</label>
+      <select id="template"></select>
+
+      <form id="form"></form>
+
+      <button id="download" type="button">Скачать PDF</button>
+      <p id="status" role="status" aria-live="polite"></p>
+    </main>
+
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>
