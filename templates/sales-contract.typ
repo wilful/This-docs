@@ -14,7 +14,7 @@
 }
 
 #let party(n, p) = {
-  let tag = if n != none { [#n. ] } else { [] }
+  let tag = if n != none { [#(n). ] } else { [] }
   [#tag ФИО: #blank(p.at("fio", default: "")), тел.: #blank(p.at("phone", default: "")),]
   parbreak()
   [адрес: #blank(p.at("address", default: "")), паспорт: #blank(p.at("passport", default: ""))]
