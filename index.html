@@ -4,24 +4,40 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Конструктор документов — Typst</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=PT+Sans:wght@400;700&family=PT+Serif:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
   </head>
   <body>
-    <main>
-      <h1>Конструктор документов</h1>
-      <p class="sub">
-        Выберите шаблон, заполните нужные поля, а пустые оставьте — в PDF будут
-        прочерки для ручного заполнения. Готовый документ собирается прямо в
-        браузере через Typst (WASM), без сервера.
-      </p>
+    <div class="wrap">
+      <header>
+        <h1>Конструктор документов</h1>
+        <p class="sub">
+          Выберите шаблон и заполните разделы по шагам. Пустые поля в PDF —
+          прочерки для ручного ввода. Сборка в браузере через Typst (WASM),
+          без сервера.
+        </p>
+      </header>
 
-      <label for="template">Шаблон</label>
-      <select id="template"></select>
+      <div class="template-row">
+        <label for="template">Шаблон</label>
+        <select id="template" class="tpl"></select>
+      </div>
 
-      <form id="form"></form>
+      <nav id="steps" class="steps" aria-label="Разделы документа"></nav>
 
-      <button id="download" type="button">Скачать PDF</button>
+      <main id="step"></main>
+
       <p id="status" role="status" aria-live="polite"></p>
-    </main>
+
+      <div id="actions" class="actions">
+        <button id="back" type="button" class="btn btn-ghost">Назад</button>
+        <button id="next" type="button" class="btn btn-primary">Далее</button>
+      </div>
+    </div>
 
     <script type="module" src="/src/main.js"></script>
   </body>
