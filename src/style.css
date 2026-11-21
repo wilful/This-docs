@@ -734,6 +734,79 @@ main#step {
   outline-offset: 2px;
 }
 
+.signature-open {
+  min-height: 44px;
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.signature-pad {
+  position: fixed;
+  z-index: 1000;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 0.8rem;
+  padding: max(0.8rem, env(safe-area-inset-top)) max(0.8rem, env(safe-area-inset-right)) max(0.8rem, env(safe-area-inset-bottom)) max(0.8rem, env(safe-area-inset-left));
+  background: var(--bg0-hard);
+  color: var(--fg1);
+}
+
+.signature-pad-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  min-width: 0;
+}
+
+.signature-pad-title {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
+}
+
+.signature-pad-title strong {
+  overflow: hidden;
+  color: var(--fg0);
+  font-family: var(--font-doc);
+  font-size: 1rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.signature-pad-hint {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.signature-pad-canvas {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 3 / 1;
+  max-height: 100%;
+  align-self: center;
+  min-height: 0;
+  border: 1px solid var(--bg4);
+}
+
+.signature-pad-actions {
+  display: flex;
+  gap: 0.55rem;
+}
+
+.signature-pad-actions .btn {
+  min-height: 48px;
+  padding-inline: 0.5rem;
+  font-size: 0.9rem;
+}
+
+@media (orientation: portrait) {
+  .signature-pad-hint::after {
+    content: " · Автоповорот может зависеть от браузера";
+  }
+}
+
 .signature-current {
   display: grid;
   gap: 0.25rem;

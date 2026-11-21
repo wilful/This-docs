@@ -739,44 +739,125 @@ function renderSignatureStep(card) {
         item.appendChild(preview);
         const replaceNote = document.createElement("p");
         replaceNote.className = "muted signature-replace-note";
-        replaceNote.textContent = "Чтобы заменить подпись, нарисуйте новую ниже и нажмите «Сохранить подпись».";
+        replaceNote.textContent = "Чтобы заменить подпись, нажмите «Изменить подпись» и сохраните новый вариант.";
         item.appendChild(replaceNote);
       }
 
-      const canvas = document.createElement("canvas");
-      canvas.className = "signature-canvas";
-      canvas.width = 640;
-      canvas.height = 180;
-      canvas.setAttribute("aria-label", `Поле для рисования подписи: ${g.title} №${index + 1}`);
-      item.appendChild(canvas);
-
       const actions = document.createElement("div");
       actions.className = "signature-actions";
-      const clear = document.createElement("button");
-      clear.type = "button";
-      clear.className = "btn-sm";
-      clear.textContent = "Очистить поле";
-      clear.disabled = true;
-      const save = document.createElement("button");
-      save.type = "button";
-      save.className = "btn-sm signature-save";
-      save.textContent = "Сохранить подпись";
-      save.disabled = true;
+      const draw = document.createElement("button");
+      draw.type = "button";
+      draw.className = "btn-sm signature-open";
+      draw.textContent = party.signature ? "Изменить подпись" : "Развернуть и подписать";
+      draw.addEventListener("click", () => openSignaturePad(g.id, index, party.fio || `${g.title} №${index + 1}`));
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "btn-sm btn-danger";
       remove.textContent = "Убрать подпись из PDF";
       remove.hidden = !party.signature;
-      actions.append(save, clear, remove);
+      remove.addEventListener("click", () => {
+        data[g.id][index].signature = "";
+        saveDraft();
+        renderStep();
+      });
+      actions.append(draw, remove);
       item.appendChild(actions);
       card.appendChild(item);
-
-      attachSignatureCanvas(canvas, save, clear, remove, g.id, index);
     });
   }
 }
 
-function attachSignatureCanvas(canvas, saveButton, clearButton, removeButton, groupId, partyIndex) {
+async function openSignaturePad(groupId, partyIndex, partyName) {
+  const overlay = document.createElement("section");
+  overlay.className = "signature-pad";
+  overlay.setAttribute("role", "dialog");
+  overlay.setAttribute("aria-modal", "true");
+  overlay.setAttribute("aria-label", `Подпись: ${partyName}`);
+
+  const header = document.createElement("header");
+  header.className = "signature-pad-head";
+  const title = document.createElement("div");
+  title.className = "signature-pad-title";
+  const heading = document.createElement("strong");
+  heading.textContent = `Подпись: ${partyName}`;
+  const hint = document.createElement("span");
+  hint.className = "signature-pad-hint";
+  hint.textContent = "Поверните телефон горизонтально и распишитесь пальцем";
+  title.append(heading, hint);
+
+  const canvas = document.createElement("canvas");
+  canvas.className = "signature-canvas signature-pad-canvas";
+  canvas.width = 1200;
+  canvas.height = 400;
+  canvas.setAttribute("aria-label", `Поле для рисования подписи: ${partyName}`);
+
+  const actions = document.createElement("footer");
+  actions.className = "signature-pad-actions";
+  const clear = document.createElement("button");
+  clear.type = "button";
+  clear.className = "btn btn-ghost";
+  clear.textContent = "Очистить";
+  clear.disabled = true;
+  const cancel = document.createElement("button");
+  cancel.type = "button";
+  cancel.className = "btn btn-ghost";
+  cancel.textContent = "Отмена";
+  const save = document.createElement("button");
+  save.type = "button";
+  save.className = "btn btn-primary";
+  save.textContent = "Сохранить подпись";
+  save.disabled = true;
+  actions.append(clear, cancel, save);
+  overlay.append(header, canvas, actions);
+  document.body.appendChild(overlay);
+
+  const close = async () => {
+    overlay.remove();
+    try {
+      if (document.fullscreenElement === overlay) await document.exitFullscreen();
+    } catch {}
+    try {
+      screen.orientation?.unlock?.();
+    } catch {}
+  };
+  cancel.addEventListener("click", close);
+  overlay.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") close();
+  });
+  save.addEventListener("click", async () => {
+    const svg = signatureSvg(strokes, canvas.width, canvas.height);
+    if (!svg) return;
+    const party = data[groupId]?.[partyIndex];
+    if (!party) return;
+    party.signature = svg;
+    saveDraft();
+    await close();
+    renderStep();
+    setStatus("Подпись сохранена в черновике этого документа.");
+  });
+
+  const strokes = attachSignatureCanvas(canvas, { clearButton: clear, saveButton: save });
+
+  try {
+    if (overlay.requestFullscreen) await overlay.requestFullscreen();
+  } catch {}
+  try {
+    if (screen.orientation?.lock) await screen.orientation.lock("landscape");
+  } catch {}
+  cancel.focus();
+}
+
+function signatureSvg(strokes, width, height) {
+  const paths = strokes.filter((stroke) => stroke.length).map((stroke) => {
+    const [first, ...rest] = stroke;
+    const end = rest.map((point) => `L ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+    return `<path d="M ${first.x.toFixed(1)} ${first.y.toFixed(1)} ${end || `L ${(first.x + 0.1).toFixed(1)} ${(first.y + 0.1).toFixed(1)}`}"/>`;
+  });
+  if (!paths.length) return "";
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}"><g fill="none" stroke="#282828" stroke-width="${Math.max(4, width / 300)}" stroke-linecap="round" stroke-linejoin="round">${paths.join("")}</g></svg>`;
+}
+
+function attachSignatureCanvas(canvas, { clearButton, saveButton }) {
   const ctx = canvas.getContext("2d");
   const strokes = [];
   let activeStroke = null;
@@ -789,77 +870,43 @@ function attachSignatureCanvas(canvas, saveButton, clearButton, removeButton, gr
     };
   };
 
-  const redraw = () => {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "#282828";
-    ctx.lineWidth = 4;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-    for (const stroke of strokes) {
-      if (!stroke.length) continue;
-      ctx.beginPath();
-      ctx.moveTo(stroke[0].x, stroke[0].y);
-      for (const point of stroke.slice(1)) ctx.lineTo(point.x, point.y);
-      if (stroke.length === 1) ctx.lineTo(stroke[0].x + 0.1, stroke[0].y + 0.1);
-      ctx.stroke();
-    }
-  };
-
-  const save = () => {
-    const paths = strokes.filter((stroke) => stroke.length).map((stroke) => {
-      const first = stroke[0];
-      const rest = stroke.slice(1).map((point) => `L ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
-      const end = rest || `L ${(first.x + 0.1).toFixed(1)} ${(first.y + 0.1).toFixed(1)}`;
-      return `<path d="M ${first.x.toFixed(1)} ${first.y.toFixed(1)} ${end}"/>`;
-    });
-    const parties = data[groupId] || [];
-    if (!parties[partyIndex]) return;
-    parties[partyIndex].signature = paths.length
-      ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180"><g fill="none" stroke="#282828" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">${paths.join("")}</g></svg>`
-      : "";
-    removeButton.hidden = !parties[partyIndex].signature;
-    saveDraft();
-    setStatus("Подпись сохранена в черновике этого документа.");
-    renderStep();
-  };
-
   canvas.addEventListener("pointerdown", (event) => {
     event.preventDefault();
     canvas.setPointerCapture(event.pointerId);
-    activeStroke = [pointFromEvent(event)];
-    strokes.push(activeStroke);
-    redraw();
-    clearButton.disabled = false;
-    saveButton.disabled = false;
+    activeStroke = pointFromEvent(event);
+    strokes.push([activeStroke]);
+    ctx.beginPath();
+    ctx.moveTo(activeStroke.x, activeStroke.y);
+    ctx.strokeStyle = "#282828";
+    ctx.lineWidth = Math.max(4, canvas.width / 300);
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
   });
   canvas.addEventListener("pointermove", (event) => {
     if (!activeStroke) return;
     const point = pointFromEvent(event);
-    const previous = activeStroke[activeStroke.length - 1];
-    if (Math.hypot(point.x - previous.x, point.y - previous.y) >= 2.5) activeStroke.push(point);
-    redraw();
+    if (Math.hypot(point.x - activeStroke.x, point.y - activeStroke.y) < 2.5) return;
+    ctx.lineTo(point.x, point.y);
+    ctx.stroke();
+    activeStroke = point;
+    strokes[strokes.length - 1].push(point);
     clearButton.disabled = false;
     saveButton.disabled = false;
   });
-  const finish = () => {
-    if (!activeStroke) return;
-    activeStroke = null;
-  };
+  const finish = () => { activeStroke = null; };
   canvas.addEventListener("pointerup", finish);
   canvas.addEventListener("pointercancel", finish);
   clearButton.addEventListener("click", () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
     strokes.length = 0;
-    redraw();
     clearButton.disabled = true;
     saveButton.disabled = true;
   });
-  saveButton.addEventListener("click", save);
-  removeButton.addEventListener("click", () => {
-    data[groupId][partyIndex].signature = "";
-    removeButton.hidden = true;
-    saveDraft();
-    renderStep();
+  canvas.addEventListener("pointerdown", () => {
+    clearButton.disabled = false;
+    saveButton.disabled = false;
   });
+  return strokes;
 }
 
 function renderSteps(groups) {
