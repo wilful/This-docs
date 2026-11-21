@@ -1,118 +1,110 @@
-// Договор купли-продажи автомобиля между физическими лицами (РФ).
-// Условия и фактическое состояние автомобиля должны быть проверены сторонами.
+// Договор купли-продажи бывшего в эксплуатации транспортного средства.
+// Структура адаптирована по предоставленному образцу; рекламные вставки исключены.
 #set page(paper: "a4", margin: (x: 2.2cm, y: 1.8cm), numbering: "1")
 #set text(font: "New Computer Modern", size: 10pt, lang: "ru", fill: rgb("282828"))
 #set par(justify: true, leading: 0.55em, spacing: 0.35em)
 
-#let rule() = line(length: 100%, stroke: (paint: rgb("d79921"), thickness: 1pt))
 #let val(v) = if v == "" or v == none { line(length: 6em, stroke: 0.5pt) } else { str(v) }
 #let fld(label, v) = [#strong[#label:] #val(v)]
-#let signature(p) = {
-  let s = p.at("signature", default: "")
-  if s == "" { line(length: 5em, stroke: 0.5pt) } else { box(image(bytes(s), format: "svg", width: 5em, height: 1.5em, fit: "contain")) }
-}
 #let heading(title) = [#v(0.45em)#text(size: 10.5pt, weight: "bold")[#title]#v(0.15em)]
 #let party(title, p) = block(inset: (x: 8pt, y: 6pt), stroke: (paint: rgb("d5c4a1"), thickness: 0.5pt))[
   #strong[#title]
   #parbreak()
   #fld("Ф.И.О.", p.at("fio", default: ""))
   #parbreak()
-  #fld("Паспорт (серия, номер, кем и когда выдан)", p.at("passport", default: ""))
+  #fld("Дата рождения", p.at("birthdate", default: ""))
+  #parbreak()
+  #fld("Паспорт: серия и номер", p.at("passport", default: ""))
+  #parbreak()
+  #fld("Кем выдан", p.at("passport_issued", default: ""))
+  #parbreak()
+  #fld("Код подразделения", p.at("passport_code", default: ""))
+  #parbreak()
+  #fld("Дата выдачи", p.at("passport_date", default: ""))
   #parbreak()
   #fld("Адрес регистрации", p.at("address", default: ""))
-  #if p.at("phone", default: "") != "" [#parbreak()#fld("Телефон", p.at("phone", default: ""))]
+  #parbreak()
+  #fld("Телефон", p.at("phone", default: ""))
 ]
+#let signature() = line(length: 5em, stroke: 0.5pt)
 
 #let doc(data: none) = {
   align(center)[
-    #text(size: 16pt, weight: "bold")[ДОГОВОР]
+    #text(size: 16pt, weight: "bold")[ДОГОВОР КУПЛИ-ПРОДАЖИ]
     #linebreak()
-    #text(size: 12pt, weight: "bold")[купли-продажи автомобиля]
+    #text(size: 12pt, weight: "bold")[ТРАНСПОРТНОГО СРЕДСТВА]
   ]
   v(0.3em)
-  rule()
-  v(0.45em)
   grid(columns: (1fr, 1fr), gutter: 1em)[#fld("Место заключения", data.terms.at("place", default: ""))][#align(right)[#fld("Дата", data.terms.at("date", default: ""))]]
-  [Граждане, указанные в разделе 1 настоящего договора, далее совместно именуемые «Стороны», заключили настоящий договор о нижеследующем.]
+  [Граждане, указанные в разделе 4 настоящего Договора, далее именуемые «Продавец» и «Покупатель» соответственно, а совместно — «Стороны», заключили настоящий договор (далее — Договор) о нижеследующем:]
 
-  heading("1. СТОРОНЫ ДОГОВОРА")
-  for (i, s) in data.sellers.enumerate() { party("Продавец " + str(i + 1), s); v(0.2em) }
-  for (i, b) in data.buyers.enumerate() { party("Покупатель " + str(i + 1), b); v(0.2em) }
-
-  heading("2. ТРАНСПОРТНОЕ СРЕДСТВО")
-  [2.1. Продавец обязуется передать в собственность Покупателя, а Покупатель — принять и оплатить автомобиль со следующими идентификационными данными:]
+  heading("1. Предмет Договора. Общие положения")
+  [1.1. Продавец обязуется передать в собственность Покупателя, а Покупатель обязуется принять и оплатить бывшее в эксплуатации транспортное средство (далее — транспортное средство) со следующими данными:]
   block(fill: rgb("f9f5e9"), inset: 8pt, radius: 3pt)[
-    #fld("Марка и модель", data.vehicle.at("model", default: ""))
+    #fld("Государственный регистрационный знак", data.vehicle.at("plate", default: ""))
     #parbreak()
-    #fld("VIN", data.vehicle.at("vin", default: ""))
+    #fld("Идентификационный номер (VIN)", data.vehicle.at("vin", default: ""))
+    #parbreak()
+    #fld("Марка, модель", data.vehicle.at("model", default: ""))
+    #parbreak()
+    #fld("Наименование (тип ТС)", data.vehicle.at("type", default: ""))
+    #parbreak()
+    #fld("Категория ТС", data.vehicle.at("category", default: ""))
     #parbreak()
     #fld("Год выпуска", data.vehicle.at("year", default: ""))
     #parbreak()
-    #fld("Номер кузова / кабины", data.vehicle.at("body", default: ""))
+    #fld("Модель и номер двигателя", data.vehicle.at("engine", default: ""))
     #parbreak()
-    #fld("Номер шасси / рамы", data.vehicle.at("chassis", default: ""))
+    #fld("Шасси (рама) №", data.vehicle.at("chassis", default: ""))
     #parbreak()
-    #fld("Номер двигателя (если указан)", data.vehicle.at("engine", default: ""))
+    #fld("Кузов (кабина, прицеп) №", data.vehicle.at("body", default: ""))
     #parbreak()
     #fld("Цвет", data.vehicle.at("color", default: ""))
     #parbreak()
-    #fld("Государственный регистрационный знак", data.vehicle.at("plate", default: ""))
+    #fld("Мощность двигателя, кВт / л. с.", data.vehicle.at("power", default: ""))
     #parbreak()
-    #fld("Пробег по одометру, км", data.vehicle.at("mileage", default: ""))
+    #fld("Рабочий объём двигателя, куб. см", data.vehicle.at("displacement", default: ""))
     #parbreak()
-    #fld("ПТС (серия, номер / электронный ПТС)", data.vehicle.at("pts", default: ""))
+    #fld("Экологический класс", data.vehicle.at("eco_class", default: ""))
     #parbreak()
-    #fld("Свидетельство о регистрации ТС", data.vehicle.at("sts", default: ""))
+    #fld("Технически допустимая масса, кг", data.vehicle.at("max_mass", default: ""))
+    #parbreak()
+    #fld("Иные индивидуализирующие признаки", data.vehicle.at("individual_features", default: ""))
+    #parbreak()
+    #fld("Паспорт транспортного средства (ПТС / ЭПТС)", data.vehicle.at("pts", default: ""))
+    #parbreak()
+    #fld("Кем выдан ПТС", data.vehicle.at("pts_issued", default: ""))
   ]
-  [2.2. Документ, на основании которого автомобиль принадлежит Продавцу:]
   parbreak()
-  fld("вид, номер и дата документа", data.vehicle.at("ownership", default: ""))
+  [1.2. Принадлежность транспортного средства Продавцу на момент подписания Договора подтверждается указанным ПТС и свидетельством о регистрации транспортного средства (техническим паспортом):]
+  parbreak()
+  fld("СТС: серия и номер", data.vehicle.at("sts", default: ""))
+  parbreak()
+  fld("Кем и когда выдано", data.vehicle.at("sts_issued", default: ""))
+  parbreak()
+  [1.3. Покупатель заключает Договор, основываясь на достоверности, полноте и актуальности представленных Продавцом сведений о том, что Продавец является собственником транспортного средства; транспортное средство не находится в залоге, под арестом или запретом регистрационных действий, не числится в розыске и не обременено правами третьих лиц.]
+  parbreak()
+  [Сведения об имеющихся ограничениях, обременениях или правах третьих лиц (при отсутствии указать «отсутствуют»):]
+  parbreak()
+  fld("Сведения", data.vehicle.at("restrictions", default: ""))
+  parbreak()
+  [Если транспортное средство приобретено Продавцом в браке, Продавец подтверждает отсутствие возражений супруга (супруги) против отчуждения транспортного средства на условиях Договора.]
+  parbreak()
+  [При недостоверности указанных заверений Продавец обязуется возвратить Покупателю уплаченную за транспортное средство сумму в полном объёме со дня обнаружения нарушения.]
 
-  heading("3. ЦЕНА И ПОРЯДОК РАСЧЁТОВ")
-  [3.1. Цена автомобиля составляет #val(data.terms.at("price", default: "")) руб. (#val(data.terms.at("price_words", default: "")) рублей).]
+  heading("2. Цена, срок и порядок оплаты")
+  [2.1. Цена транспортного средства составляет #val(data.terms.at("price", default: "")) (#val(data.terms.at("price_words", default: ""))) руб. НДС не облагается. Оплата производится наличным или безналичным расчётом в следующем порядке:]
   parbreak()
-  [3.2. Порядок, способ и срок оплаты:]
+  fld("Порядок и срок оплаты", data.terms.at("payment", default: ""))
   parbreak()
-  fld("способ оплаты, срок и подтверждение расчёта", data.terms.at("payment", default: ""))
-  parbreak()
-  [Получение оплаты подтверждается распиской Продавца или иным документом, если оплата не производится одновременно с подписанием договора.]
+  [2.2. Передача транспортного средства осуществляется Продавцом в момент передачи Покупателем денежных средств в счёт оплаты стоимости транспортного средства.]
 
-  heading("4. ПЕРЕДАЧА АВТОМОБИЛЯ")
-  [4.1. Автомобиль, ключи и документы передаются Покупателю в срок и месте:]
+  heading("3. Заключительные положения")
+  [3.1. Настоящий Договор вступает в силу после его подписания Сторонами и действует до полного исполнения Сторонами обязательств.]
   parbreak()
-  fld("дата, время и место передачи", data.terms.at("transfer", default: ""))
-  parbreak()
-  [4.2. Состояние, известные недостатки, повреждения, комплектность и передаваемое оборудование:]
-  parbreak()
-  fld("описать либо указать приложение", data.terms.at("condition", default: ""))
-  parbreak()
-  [4.3. Покупатель осмотрел автомобиль и получил возможность проверить его состояние. Это не ограничивает права Покупателя в отношении недостатков, о которых Продавец не сообщил и которые нельзя было выявить при обычном осмотре.]
-  parbreak()
-  [4.4. Автомобиль и документы переданы Покупателю:]
-  parbreak()
-  [Дата и время: #line(length: 4em, stroke: 0.5pt)    Подписи: #line(length: 4em, stroke: 0.5pt) / #line(length: 4em, stroke: 0.5pt)]
+  [3.2. Договор составлен в трёх экземплярах равной юридической силы: по одному для каждой из Сторон и один для регистрационных действий.]
 
-  heading("5. ЗАВЕРЕНИЯ СТОРОН И РЕГИСТРАЦИЯ")
-  [5.1. Продавец подтверждает, что вправе распоряжаться автомобилем. Сведения о залоге, аресте, ограничениях и правах третьих лиц:]
-  parbreak()
-  fld("указать либо написать «отсутствуют»", data.vehicle.at("restrictions", default: ""))
-  parbreak()
-  [5.2. Сведения о семейном положении Продавца и согласии супруга (если применимо):]
-  parbreak()
-  fld("указать обстоятельства / реквизиты согласия", data.terms.at("spouse", default: ""))
-  parbreak()
-  [5.3. Покупатель обязан обратиться за внесением изменений в регистрационные данные транспортного средства в срок, установленный законодательством.]
-
-  heading("6. ЗАКЛЮЧИТЕЛЬНЫЕ ПОЛОЖЕНИЯ")
-  [6.1. Договор вступает в силу с момента подписания Сторонами. Изменения оформляются письменно.]
-  parbreak()
-  [6.2. Договор составлен в трёх экземплярах равной юридической силы: по одному для каждой Стороны и один для регистрационных действий.]
-  parbreak()
-  fld("Приложения", data.terms.at("appendices", default: ""))
-
-  heading("7. ПОДПИСИ СТОРОН")
-  for s in data.sellers { party("Продавец", s); v(0.25em); [Подпись: #signature(s)]; v(0.3em) }
-  for b in data.buyers { party("Покупатель", b); v(0.25em); [Подпись: #signature(b)]; v(0.3em) }
-  v(0.3em)
-  align(center, text(size: 8pt, fill: rgb("7c6f64"))[Перед сделкой проверьте документы на автомобиль и сведения о залоге и ограничениях.])
+  heading("4. Адреса и реквизиты Сторон")
+  for s in data.sellers { party("Продавец", s); v(0.25em); [Денежные средства в сумме #val(data.terms.at("price", default: "")) руб. получил: #signature() / #strong[Ф.И.О.]; транспортное средство передал: #signature() / #strong[Ф.И.О.]]; v(0.35em) }
+  for b in data.buyers { party("Покупатель", b); v(0.25em); [Транспортное средство получил: #signature() / #strong[Ф.И.О.]]; v(0.35em) }
 }

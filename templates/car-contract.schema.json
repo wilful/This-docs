@@ -1,7 +1,7 @@
 {
   "id": "car-contract",
   "name": "Договор купли-продажи автомобиля",
-  "description": "Машина и документы: стороны, ПТС и СТС, цена, передача ключей.",
+  "description": "ДКП подержанного автомобиля: стороны, сведения о ТС и документах, заверения продавца, цена и передача.",
   "groups": [
     {
       "id": "sellers",
@@ -16,6 +16,7 @@
           "placeholder": "Иванов Иван Иванович",
           "autocomplete": "name"
         },
+        { "key": "birthdate", "label": "Дата рождения", "type": "date" },
         { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" },
         {
           "key": "address",
@@ -27,8 +28,11 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "серия, номер, кем и когда выдан"
-        }
+          "placeholder": "серия и номер"
+        },
+        { "key": "passport_issued", "label": "Кем выдан паспорт", "type": "text" },
+        { "key": "passport_code", "label": "Код подразделения", "type": "text", "placeholder": "000-000" },
+        { "key": "passport_date", "label": "Дата выдачи паспорта", "type": "date" }
       ]
     },
     {
@@ -44,6 +48,7 @@
           "placeholder": "Петров Пётр Петрович",
           "autocomplete": "name"
         },
+        { "key": "birthdate", "label": "Дата рождения", "type": "date" },
         { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" },
         {
           "key": "address",
@@ -55,8 +60,11 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "серия, номер, кем и когда выдан"
-        }
+          "placeholder": "серия и номер"
+        },
+        { "key": "passport_issued", "label": "Кем выдан паспорт", "type": "text" },
+        { "key": "passport_code", "label": "Код подразделения", "type": "text", "placeholder": "000-000" },
+        { "key": "passport_date", "label": "Дата выдачи паспорта", "type": "date" }
       ]
     },
     {
@@ -70,17 +78,24 @@
           "required": true,
           "placeholder": "Lada Vesta"
         },
+        { "key": "type", "label": "Наименование (тип ТС)", "type": "text", "placeholder": "легковой автомобиль" },
+        { "key": "category", "label": "Категория ТС", "type": "text", "placeholder": "B" },
         { "key": "vin", "label": "VIN", "type": "text", "placeholder": "17 символов" },
         { "key": "year", "label": "Год выпуска", "type": "number", "placeholder": "2020" },
-        { "key": "engine", "label": "Номер двигателя", "type": "text", "placeholder": "…" },
+        { "key": "engine", "label": "Модель и номер двигателя", "type": "text", "placeholder": "…" },
         { "key": "body", "label": "Номер кузова / кабины", "type": "text", "placeholder": "…" },
         { "key": "chassis", "label": "Номер шасси / рамы", "type": "text", "placeholder": "если указан в документах" },
         { "key": "color", "label": "Цвет", "type": "text", "placeholder": "белый" },
         { "key": "plate", "label": "Гос. рег. знак", "type": "text", "placeholder": "А000АА 77" },
-        { "key": "mileage", "label": "Пробег по одометру, км", "type": "number", "placeholder": "0" },
-        { "key": "pts", "label": "ПТС (серия, номер / электронный ПТС)", "type": "text", "placeholder": "реквизиты ПТС или номер ЭПТС" },
-        { "key": "sts", "label": "Свидетельство о регистрации ТС", "type": "text", "placeholder": "серия и номер" },
-        { "key": "ownership", "label": "Документ о праве собственности продавца", "type": "text", "placeholder": "договор, свидетельство о наследстве и т. п." },
+        { "key": "power", "label": "Мощность двигателя, кВт / л. с.", "type": "text" },
+        { "key": "displacement", "label": "Рабочий объём двигателя, куб. см", "type": "number" },
+        { "key": "eco_class", "label": "Экологический класс", "type": "text" },
+        { "key": "max_mass", "label": "Технически допустимая масса, кг", "type": "number" },
+        { "key": "individual_features", "label": "Иные индивидуализирующие признаки", "type": "textarea", "placeholder": "голограммы, рисунки и т. п." },
+        { "key": "pts", "label": "ПТС / номер электронного ПТС", "type": "text", "placeholder": "серия и номер ПТС или номер ЭПТС" },
+        { "key": "pts_issued", "label": "Кем выдан ПТС", "type": "text" },
+        { "key": "sts", "label": "СТС: серия и номер", "type": "text" },
+        { "key": "sts_issued", "label": "Кем и когда выдано СТС", "type": "text" },
         { "key": "restrictions", "label": "Залог, арест, ограничения, права третьих лиц", "type": "textarea", "placeholder": "Отсутствуют или перечислите сведения" }
       ]
     },
@@ -97,11 +112,7 @@
         },
         { "key": "price_words", "label": "Цена прописью", "type": "text", "placeholder": "например: один миллион рублей 00 копеек" },
         { "key": "payment", "label": "Порядок и срок оплаты", "type": "textarea", "placeholder": "наличные / перевод, срок и подтверждение расчёта" },
-        { "key": "transfer", "label": "Срок, время и место передачи", "type": "text", "placeholder": "дата, время, место" },
-        { "key": "condition", "label": "Состояние, недостатки и комплектность", "type": "textarea", "placeholder": "известные недостатки, оборудование, комплект ключей" },
-        { "key": "spouse", "label": "Семейное положение / согласие супруга", "type": "textarea", "placeholder": "укажите применимые обстоятельства и реквизиты согласия" },
-        { "key": "appendices", "label": "Приложения", "type": "textarea", "placeholder": "акт приёма-передачи, расписка, опись" },
-        { "key": "date", "label": "Дата договора", "type": "date" },
+        { "key": "date", "label": "Дата договора", "type": "date", "required": true },
         {
           "key": "place",
           "label": "Место заключения",
