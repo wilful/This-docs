@@ -13,6 +13,9 @@ const PARTY_PREFIX = "docbuilder:parties:";
 const els = {
   tpl: document.getElementById("template"),
   steps: document.getElementById("steps"),
+  progress: document.getElementById("progress"),
+  brandTitle: document.getElementById("brand-title"),
+  brandSubtitle: document.getElementById("brand-subtitle"),
   step: document.getElementById("step"),
   status: document.getElementById("status"),
   back: document.getElementById("back"),
@@ -21,6 +24,7 @@ const els = {
   home: document.getElementById("home"),
   restart: document.getElementById("restart"),
   clearData: document.getElementById("clear-data"),
+  toolsMenu: document.querySelector(".tools-menu"),
 };
 
 // ---- saved documents (localStorage) ----
@@ -509,6 +513,10 @@ function renderStep() {
   const groups = getGroups(current);
   const g = groups[stepIndex];
 
+  els.brandTitle.textContent = current.schema.name;
+  els.brandSubtitle.textContent = "Конструктор документов";
+  els.progress.textContent = `Шаг ${stepIndex + 1} из ${groups.length}`;
+
   els.step.innerHTML = "";
   const card = document.createElement("div");
   card.className = "card";
@@ -550,6 +558,7 @@ function renderStep() {
 }
 
 function renderSteps(groups) {
+  els.steps.setAttribute("aria-label", `Разделы документа, шаг ${stepIndex + 1} из ${groups.length}`);
   els.steps.innerHTML = "";
   groups.forEach((g, i) => {
     const chip = document.createElement("button");
@@ -622,6 +631,7 @@ function selectTemplateStart() {
 }
 
 els.restart.addEventListener("click", () => {
+  els.toolsMenu.open = false;
   if (!window.confirm("Очистить черновики и начать заново? Сохранённые документы останутся.")) return;
   for (const tpl of templates) localStorage.removeItem(draftKey(tpl.id));
   current = templates[0];
@@ -633,6 +643,7 @@ els.restart.addEventListener("click", () => {
 });
 
 els.clearData.addEventListener("click", () => {
+  els.toolsMenu.open = false;
   if (!window.confirm("Удалить все сохранённые документы, черновики и данные сторон? Это действие нельзя отменить.")) return;
   localStorage.removeItem(DOCS_KEY);
   for (const tpl of templates) localStorage.removeItem(draftKey(tpl.id));

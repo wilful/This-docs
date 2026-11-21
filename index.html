@@ -8,8 +8,26 @@
   <body>
     <div class="wrap">
       <header>
-        <h1>Конструктор документов</h1>
-        <button id="home" type="button" class="home-btn" aria-label="К выбору шаблона">← Шаблоны</button>
+        <button id="home" type="button" class="home-btn" aria-label="К выбору шаблона" title="К выбору шаблона">←</button>
+        <div class="brand" id="brand">
+          <h1 id="brand-title">Документы</h1>
+          <p id="brand-subtitle">Конструктор договоров</p>
+        </div>
+        <details class="tools-menu">
+          <summary aria-label="Действия с данными" title="Действия с данными">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
+          </summary>
+          <div class="tools-popover">
+            <button id="restart" type="button" class="tool-item">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>
+              <span>Начать заново</span>
+            </button>
+            <button id="clear-data" type="button" class="tool-item destructive">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg>
+              <span>Удалить сохранённые данные</span>
+            </button>
+          </div>
+        </details>
       </header>
 
       <div class="template-row">
@@ -22,24 +40,10 @@
         <div class="docs-body" id="docs-body"></div>
       </details>
 
-      <section class="data-actions" aria-label="Сброс и удаление данных">
-        <div class="data-action">
-          <div>
-            <strong>Начать заново</strong>
-            <p>Очистить черновики и вернуться к началу. Сохранённые документы останутся.</p>
-          </div>
-          <button id="restart" type="button" class="btn btn-ghost">Сбросить</button>
-        </div>
-        <div class="data-action">
-          <div>
-            <strong>Удалить сохранённые данные</strong>
-            <p>Удалить документы, черновики и сохранённые данные сторон. Шаблоны останутся.</p>
-          </div>
-          <button id="clear-data" type="button" class="btn btn-danger">Удалить всё</button>
-        </div>
-      </section>
-
-      <nav id="steps" class="steps" aria-label="Разделы документа"></nav>
+      <div class="progress-row">
+        <p id="progress" class="progress" aria-live="polite"></p>
+        <nav id="steps" class="steps" aria-label="Разделы документа"></nav>
+      </div>
 
       <main id="step"></main>
 

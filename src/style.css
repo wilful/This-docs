@@ -70,28 +70,43 @@ body {
 header {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
+  gap: 0.7rem;
   padding: 1.25rem 1.25rem 1rem;
   border-bottom: 1px solid var(--bg2);
 }
 
-header h1 {
-  font-size: 1.45rem;
+.brand {
+  min-width: 0;
+  flex: 1;
+}
+
+.brand h1 {
+  overflow: hidden;
+  font-size: 0.98rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   margin: 0;
   color: var(--fg);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.brand p {
+  margin: 0.1rem 0 0;
+  color: var(--gray);
+  font-size: 0.67rem;
 }
 
 .home-btn {
   flex: 0 0 auto;
-  border: 1px solid var(--bg3);
-  border-radius: var(--radius-sm);
-  padding: 0.45rem 0.65rem;
+  width: 38px;
+  height: 38px;
+  border: 1px solid var(--bg2);
+  border-radius: 10px;
+  padding: 0;
   background: var(--bg1);
   color: var(--fg2);
-  font: 600 0.78rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font: 500 1.35rem/1 ui-sans-serif, system-ui, sans-serif;
   cursor: pointer;
 }
 
@@ -103,6 +118,88 @@ header h1 {
 .home-btn:focus-visible {
   outline: 2px solid var(--yellow);
   outline-offset: 2px;
+}
+
+.tools-menu {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.tools-menu > summary {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  list-style: none;
+  border: 1px solid var(--bg2);
+  border-radius: 10px;
+  background: var(--bg1);
+  color: var(--fg2);
+  cursor: pointer;
+}
+
+.tools-menu > summary::-webkit-details-marker {
+  display: none;
+}
+
+.tools-menu > summary:hover,
+.tools-menu[open] > summary {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.tools-menu > summary svg,
+.tool-item svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.tools-popover {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 0.5rem);
+  right: 0;
+  display: grid;
+  width: max-content;
+  min-width: 220px;
+  max-width: min(300px, calc(100vw - 2rem));
+  padding: 0.35rem;
+  border: 1px solid var(--bg2);
+  border-radius: 10px;
+  background: var(--bg1);
+  box-shadow: var(--shadow);
+}
+
+.tool-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  min-height: 42px;
+  padding: 0.55rem 0.65rem;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--fg2);
+  text-align: left;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.tool-item:hover {
+  background: var(--bg2);
+  color: var(--fg);
+}
+
+.tool-item.destructive {
+  color: var(--red);
 }
 
 /* ---------------- template selector ---------------- */
@@ -140,11 +237,27 @@ select.tpl:focus-visible {
 
 /* ---------------- steps ---------------- */
 
+.progress-row {
+  display: block;
+  min-width: 0;
+  background: var(--bg0-hard);
+  border-bottom: 1px solid var(--bg2);
+}
+
+.progress {
+  margin: 0;
+  padding: 0.65rem 1.25rem 0;
+  color: var(--yellow);
+  font: 600 0.7rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  white-space: nowrap;
+}
+
 .steps {
   display: flex;
+  flex: 1 1 auto;
   flex-wrap: nowrap;
   gap: 0.35rem;
-  padding: 0.8rem 1.25rem;
+  padding: 0.45rem 1.25rem 0.7rem;
   overflow-x: auto;
   overflow-y: hidden;
   scrollbar-width: none;
@@ -152,8 +265,7 @@ select.tpl:focus-visible {
      otherwise refuse to shrink below its content and overflow the layout. */
   min-width: 0;
   max-width: 100%;
-  background: var(--bg0-hard);
-  border-bottom: 1px solid var(--bg2);
+  background: transparent;
 }
 
 .steps::-webkit-scrollbar {
@@ -489,60 +601,6 @@ textarea:focus {
   padding: 0.2rem 0.7rem 0.7rem;
 }
 
-.data-actions {
-  display: grid;
-  gap: 0.5rem;
-  margin: 0.65rem 1rem 0;
-  min-width: 0;
-}
-
-.data-action {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 0.75rem;
-  min-width: 0;
-  padding: 0.65rem 0.75rem;
-  border: 1px solid var(--bg2);
-  border-radius: var(--radius-sm);
-  background: var(--bg1);
-}
-
-.data-action strong {
-  display: block;
-  overflow-wrap: anywhere;
-  color: var(--fg2);
-  font-size: 0.82rem;
-}
-
-.data-action > div {
-  min-width: 0;
-}
-
-.data-action p {
-  margin: 0.15rem 0 0;
-  color: var(--gray);
-  font-size: 0.73rem;
-  line-height: 1.35;
-}
-
-.data-action .btn {
-  flex: 0 0 auto;
-  min-height: 38px;
-  padding: 0.35rem 0.65rem;
-  font-size: 0.78rem;
-}
-
-.btn-danger {
-  border-color: var(--red);
-  background: transparent;
-  color: var(--red);
-}
-
-.btn-danger:hover {
-  background: rgba(251, 73, 52, 0.1);
-}
-
 .actions-secondary {
   padding: 0.4rem 1rem 0;
 }
@@ -560,8 +618,13 @@ textarea:focus {
     padding-inline: 1rem;
   }
 
-  .steps {
+  .progress {
     padding-inline: 1rem;
+    font-size: 0.65rem;
+  }
+
+  .steps {
+    padding: 0.4rem 1rem 0.65rem;
     gap: 0.2rem;
     overflow-x: auto;
     scroll-snap-type: x proximity;
@@ -588,12 +651,8 @@ textarea:focus {
     flex-basis: 100%;
   }
 
-  .data-actions {
-    margin-inline: 1rem;
-  }
-
-  .data-action {
-    align-items: flex-start;
+  header {
+    padding-block: 0.85rem;
   }
 }
 
