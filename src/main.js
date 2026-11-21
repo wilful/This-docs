@@ -19,6 +19,8 @@ const els = {
   next: document.getElementById("next"),
   save: document.getElementById("save"),
   home: document.getElementById("home"),
+  restart: document.getElementById("restart"),
+  clearData: document.getElementById("clear-data"),
 };
 
 // ---- saved documents (localStorage) ----
@@ -609,18 +611,42 @@ els.back.addEventListener("click", () => {
 });
 
 els.home.addEventListener("click", () => {
-  const hasProgress = stepIndex > 0 || getGroups(current).some((g) => {
-    const value = data[g.id];
-    return g.repeatable
-      ? value.length > 0
-      : Object.values(value || {}).some((v) => String(v ?? "").trim() !== "");
-  });
-  if (hasProgress && !window.confirm("Вернуться к выбору шаблона? Черновик текущего документа останется сохранён.")) return;
-  saveDraft();
+  selectTemplateStart();
+});
+
+function selectTemplateStart() {
   stepIndex = 0;
   els.tpl.focus();
   els.tpl.scrollIntoView({ behavior: "smooth", block: "start" });
   setStatus("Выберите шаблон документа.");
+}
+
+els.restart.addEventListener("click", () => {
+  if (!window.confirm("Очистить черновики и начать заново? Сохранённые документы останутся.")) return;
+  for (const tpl of templates) localStorage.removeItem(draftKey(tpl.id));
+  current = templates[0];
+  data = emptyData(current);
+  stepIndex = 0;
+  els.tpl.value = current.id;
+  renderStep();
+  selectTemplateStart();
+});
+
+els.clearData.addEventListener("click", () => {
+  if (!window.confirm("Удалить все сохранённые документы, черновики и данные сторон? Это действие нельзя отменить.")) return;
+  localStorage.removeItem(DOCS_KEY);
+  for (const tpl of templates) localStorage.removeItem(draftKey(tpl.id));
+  for (const groupId of new Set(templates.flatMap((tpl) => getGroups(tpl).filter((g) => g.repeatable).map((g) => g.id)))) {
+    localStorage.removeItem(partyKey(groupId));
+  }
+  current = templates[0];
+  data = emptyData(current);
+  stepIndex = 0;
+  els.tpl.value = current.id;
+  renderStep();
+  renderSavedDocs();
+  selectTemplateStart();
+  setStatus("Все сохранённые данные удалены. Шаблоны доступны.");
 });
 
 els.save.addEventListener("click", () => {
