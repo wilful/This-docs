@@ -1,4 +1,4 @@
-# AGENTS.md — Groovebox · Doc Studio
+# AGENTS.md — Typst Doc Studio
 
 Agent-facing notes for working in this repository. The app is a **static,
 client-only document constructor**: the user picks a Typst template, fills in
@@ -7,23 +7,23 @@ Typst compiled to WebAssembly. There is **no backend**.
 
 ## What the product is
 
-A "groovebox" styled document machine. The UI metaphor (decided with the user)
-is a piece of music hardware: the **sequencer strip** is the list of document
-sections (steps), each field is a panel control, and the two bottom **transport
-pads** (Back / Next→PDF) drive the flow. Keep this identity when changing the UI:
-dark chassis, acid-lime primary, cyan "screen" accents, magenta for required
-fields. Do not revert to a generic light/document theme.
+A Typst document constructor. The UI is a plain, dark form wizard: the user
+picks a template, fills grouped sections step by step, and exports a PDF. The
+visual identity is the **Gruvbox** color scheme (dark, warm-retro palette:
+bg0–bg4 surfaces, cream foreground, and the red/green/yellow/blue/purple/aqua/
+orange accents). Technical UI bits (step numbers, labels, status) use a
+monospace face to lean into Gruvbox's terminal heritage.
 
 ## Layout of the code
 
 - `index.html` — page shell. Keep the IDs the script reads: `template`,
-  `steps`, `step`, `status`, `back`, `next`. The `.power-led`, `.brand`,
-  `.model`, `.sub` elements are decorative device chrome only.
+  `steps`, `step`, `status`, `back`, `next`. The `.sub` element is a plain
+  descriptive subtitle only.
 - `src/main.js` — all behavior. Schema-agnostic: supports **grouped** schemas
   (`schema.groups`) and legacy **flat** schemas (`schema.fields`). Renders
   repeatable groups as "voices" (add/remove/save parties), builds the Typst
   source, and compiles PDF via `$typst.pdf(...)`.
-- `src/style.css` — the Groove Box visual identity. Tokens live in `:root`.
+- `src/style.css` — the Gruvbox visual identity. Tokens live in `:root`.
 - `src/templates.js` — registry. Import each `.typ?raw` + sidecar
   `.schema.json`, push an entry `{ id, name, typ, schema }`.
 - `templates/*.typ` — a `doc(..)` function. Grouped schemas receive
@@ -79,5 +79,5 @@ npm run preview   # preview the build
 
 - Keep behavior in `main.js`; do not split logic into new files unless asked.
 - Preserve `localStorage` party storage and the two schema formats.
-- Visual changes must stay within the Groove Box identity (tokens in `:root`).
+- Visual changes must stay within the Gruvbox identity (tokens in `:root`).
 - Write copy in Russian, sentence case, plain verbs (e.g. "Скачать PDF").
