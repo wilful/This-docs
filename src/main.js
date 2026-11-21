@@ -711,20 +711,24 @@ function renderSignatureStep(card) {
   intro.textContent = "При желании нарисуйте подпись пальцем или мышью. Она будет добавлена в PDF как изображение; это не криптографическая электронная подпись. Подпись необязательна.";
   card.appendChild(intro);
 
-  const partyGroups = getGroups(current).filter((g) => g.repeatable && ["sellers", "buyers"].includes(g.id));
+  const partyGroups = getGroups(current).filter((g) => ["sellers", "buyers"].includes(g.id));
   for (const g of partyGroups) {
-    const parties = data[g.id] || [];
+    const parties = g.repeatable
+      ? (data[g.id] || []).map((party, index) => ({ party, index }))
+      : data[g.id]
+        ? [{ party: data[g.id], index: null }]
+        : [];
     if (!parties.length) continue;
     const heading = document.createElement("h3");
     heading.className = "signature-group-title";
     heading.textContent = g.title;
     card.appendChild(heading);
 
-    parties.forEach((party, index) => {
+    parties.forEach(({ party, index }) => {
       const item = document.createElement("section");
       item.className = "signature-item";
       const label = document.createElement("h4");
-      label.textContent = `${g.title} №${index + 1}${party.fio ? ` — ${party.fio}` : ""}`;
+      label.textContent = `${g.title}${index === null ? "" : ` №${index + 1}`}${party.fio ? ` — ${party.fio}` : ""}`;
       item.appendChild(label);
 
       if (party.signature) {
@@ -734,7 +738,7 @@ function renderSignatureStep(card) {
         previewLabel.textContent = "Текущая подпись в документе";
         const image = document.createElement("img");
         image.src = `data:image/svg+xml,${encodeURIComponent(party.signature)}`;
-        image.alt = `Подпись ${party.fio || `${g.title} №${index + 1}`}`;
+        image.alt = `Подпись ${party.fio || `${g.title}${index === null ? "" : ` №${index + 1}`}`}`;
         preview.append(previewLabel, image);
         item.appendChild(preview);
         const replaceNote = document.createElement("p");
@@ -749,14 +753,15 @@ function renderSignatureStep(card) {
       draw.type = "button";
       draw.className = "btn-sm signature-open";
       draw.textContent = party.signature ? "Изменить подпись" : "Развернуть и подписать";
-      draw.addEventListener("click", () => openSignaturePad(g.id, index, party.fio || `${g.title} №${index + 1}`));
+      draw.addEventListener("click", () => openSignaturePad(g.id, index, party.fio || `${g.title}${index === null ? "" : ` №${index + 1}`}`));
       const remove = document.createElement("button");
       remove.type = "button";
       remove.className = "btn-sm btn-danger";
       remove.textContent = "Убрать подпись из PDF";
       remove.hidden = !party.signature;
       remove.addEventListener("click", () => {
-        data[g.id][index].signature = "";
+        if (index === null) data[g.id].signature = "";
+        else data[g.id][index].signature = "";
         saveDraft();
         renderStep();
       });
@@ -827,7 +832,8 @@ async function openSignaturePad(groupId, partyIndex, partyName) {
   save.addEventListener("click", async () => {
     const svg = signatureSvg(strokes, canvas.width, canvas.height);
     if (!svg) return;
-    const party = data[groupId]?.[partyIndex];
+    const group = getGroups(current).find((item) => item.id === groupId);
+    const party = group?.repeatable ? data[groupId]?.[partyIndex] : data[groupId];
     if (!party) return;
     party.signature = svg;
     saveDraft();
@@ -1034,6 +1040,7 @@ function writeStep(g) {
     });
   } else {
     const o = {};
+    if (data[g.id]?.signature) o.signature = data[g.id].signature;
     for (const f of g.fields) {
       const el = els.step.querySelector(`[data-key="${f.key}"]`);
       o[f.key] = el ? el.value : "";

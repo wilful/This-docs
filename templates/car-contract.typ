@@ -4,6 +4,14 @@
 #set par(justify: true, leading: 0.36em, spacing: 0.16em)
 
 #let val(v) = if v == "" or v == none { line(length: 10em, stroke: 0.45pt) } else { str(v) }
+#let signature(p) = {
+  let value = p.at("signature", default: "")
+  if value == "" {
+    line(length: 4cm, stroke: 0.5pt)
+  } else {
+    image(bytes(value), format: "svg", width: 4cm, height: 1cm, fit: "contain")
+  }
+}
 #let section(title) = align(center)[#strong[#title]]
 
 #let doc(data: none) = {
@@ -85,7 +93,7 @@
     [Адрес регистрации: #val(seller.at("address", default: ""))], [Адрес регистрации: #val(buyer.at("address", default: ""))],
     [Телефон: #val(seller.at("phone", default: ""))], [Телефон: #val(buyer.at("phone", default: ""))],
     [Денежные средства в сумме #val(terms.at("price", default: "")) руб. получил], [Транспортное средство получил],
-    [(подпись) #linebreak() #text("/") #line(length: 4cm, stroke: 0.5pt) #text("/") #linebreak() (ФИО)], [(подпись) #linebreak() #text("/") #line(length: 4cm, stroke: 0.5pt) #text("/") #linebreak() (ФИО)],
+    [(подпись) #linebreak() /#signature(seller)/ #linebreak() (ФИО)], [(подпись) #linebreak() /#signature(buyer)/ #linebreak() (ФИО)],
   )
   v(0.15em)
   v(0.1em)
