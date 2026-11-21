@@ -17,7 +17,152 @@ const els = {
   status: document.getElementById("status"),
   back: document.getElementById("back"),
   next: document.getElementById("next"),
+  save: document.getElementById("save"),
 };
+
+// ---- saved documents (localStorage) ----
+
+const DOCS_KEY = "docbuilder:docs";
+const draftKey = (id) => `docbuilder:draft:${id}`;
+
+function loadDocs() {
+  try {
+    return JSON.parse(localStorage.getItem(DOCS_KEY) || "[]");
+  } catch {
+    return [];
+  }
+}
+
+function saveDocs(list) {
+  // Keep the most recent versions so storage stays bounded.
+  localStorage.setItem(DOCS_KEY, JSON.stringify(list.slice(-50)));
+}
+
+function cloneData(o) {
+  return JSON.parse(JSON.stringify(o ?? {}));
+}
+
+// Persist the current in-progress document so a reload restores it.
+function saveDraft() {
+  try {
+    localStorage.setItem(
+      draftKey(current.id),
+      JSON.stringify({ stepIndex, data: cloneData(data) })
+    );
+  } catch {}
+}
+
+function loadDraft(tpl) {
+  try {
+    const raw = localStorage.getItem(draftKey(tpl.id));
+    if (!raw) return null;
+    const o = JSON.parse(raw);
+    if (o && o.data) return o;
+  } catch {}
+  return null;
+}
+
+// Save a filled version of the document (all versions are kept).
+function addDoc(tpl, values) {
+  const list = loadDocs();
+  const now = new Date();
+  const stamp = now.toLocaleString("ru-RU", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
+  list.push({
+    id: "doc_" + now.getTime() + "_" + Math.random().toString(36).slice(2, 7),
+    templateId: tpl.id,
+    templateName: tpl.schema.name,
+    name: `${tpl.schema.name} — ${stamp}`,
+    savedAt: now.toISOString(),
+    data: cloneData(values),
+  });
+  saveDocs(list);
+  renderSavedDocs();
+  return list[list.length - 1];
+}
+
+function deleteDoc(id) {
+  saveDocs(loadDocs().filter((d) => d.id !== id));
+  renderSavedDocs();
+}
+
+function loadDoc(id) {
+  const doc = loadDocById(id);
+  if (!doc) return;
+  const tpl = templates.find((t) => t.id === doc.templateId) || current;
+  current = tpl;
+  els.tpl.value = tpl.id;
+  data = cloneData(doc.data);
+  stepIndex = 0;
+  renderStep();
+  setStatus("Документ загружен из сохранённых.");
+}
+
+function loadDocById(id) {
+  return loadDocs().find((d) => d.id === id);
+}
+
+function renderSavedDocs() {
+  const body = document.getElementById("docs-body");
+  if (!body) return;
+  const docs = loadDocs();
+  body.innerHTML = "";
+  if (!docs.length) {
+    const p = document.createElement("p");
+    p.className = "muted";
+    p.textContent = "Сохранённых документов пока нет — заполните и нажмите «Сохранить документ».";
+    body.appendChild(p);
+    return;
+  }
+  const sel = document.createElement("select");
+  sel.id = "doc-list";
+  const ph = document.createElement("option");
+  ph.value = "";
+  ph.textContent = "Выберите сохранённый документ…";
+  ph.disabled = true;
+  ph.selected = true;
+  sel.appendChild(ph);
+  docs.forEach((d) => {
+    const o = document.createElement("option");
+    o.value = d.id;
+    o.textContent = d.name;
+    sel.appendChild(o);
+  });
+  const loadBtn = document.createElement("button");
+  loadBtn.type = "button";
+  loadBtn.className = "btn-sm";
+  loadBtn.textContent = "Загрузить";
+  loadBtn.addEventListener("click", () => {
+    if (sel.value) loadDoc(sel.value);
+  });
+  const delBtn = document.createElement("button");
+  delBtn.type = "button";
+  delBtn.className = "btn-sm btn-danger";
+  delBtn.textContent = "Удалить";
+  delBtn.addEventListener("click", () => {
+    if (sel.value) deleteDoc(sel.value);
+  });
+  const row = document.createElement("div");
+  row.className = "saved";
+  row.append(sel, loadBtn, delBtn);
+  body.appendChild(row);
+}
+
+function showSourceDump(source) {
+  const d = document.createElement("details");
+  d.className = "src-dump";
+  const s = document.createElement("summary");
+  s.textContent = "Показать сгенерированный Typst-исходник";
+  const pre = document.createElement("pre");
+  pre.textContent = source;
+  d.append(s, pre);
+  els.step.prepend(d);
+}
 
 let current = templates[0];
 let stepIndex = 0;
@@ -398,6 +543,7 @@ function renderStep() {
   renderSteps(groups);
   renderActions(groups);
   els.step.scrollTop = 0;
+  saveDraft();
 }
 
 function renderSteps(groups) {
@@ -453,6 +599,11 @@ els.back.addEventListener("click", () => {
   writeStep(getGroups(current)[stepIndex]);
   stepIndex--;
   renderStep();
+});
+
+els.save.addEventListener("click", () => {
+  addDoc(current, data);
+  setStatus("Документ сохранён в «Мои документы» (все версии).");
 });
 
 // ---- read / write current step to state ----
@@ -661,7 +812,8 @@ async function exportPdf() {
     a.download = `${current.id}.pdf`;
     a.click();
     URL.revokeObjectURL(url);
-    setStatus("Готово — PDF скачан.");
+    addDoc(current, data);
+    setStatus("Готово — PDF скачан и сохранён в «Мои документы».");
   } catch (e) {
     console.error(e);
     // Dump the exact source we tried to compile so the failure is diagnosable.
@@ -669,7 +821,8 @@ async function exportPdf() {
     // the new code is live; if you still see `[#(n). ]`, the build is stale.
     console.error("[typst source]\n" + source);
     window.__lastTypstSource = source;
-    setStatus("Ошибка компиляции — исходник в консоли (F12): window.__lastTypstSource", true);
+    showSourceDump(source);
+    setStatus("Ошибка компиляции — исходник показан ниже (раскройте «Показать Typst-исходник»).", true);
   } finally {
     els.next.disabled = false;
     els.back.disabled = false;
@@ -694,13 +847,28 @@ function initPicker() {
   }
   els.tpl.value = current.id;
   els.tpl.addEventListener("change", () => {
-    current = templates.find((t) => t.id === els.tpl.value) || templates[0];
-    stepIndex = 0;
-    data = emptyData(current);
+    saveDraft();
+    const tpl = templates.find((t) => t.id === els.tpl.value) || templates[0];
+    const d = loadDraft(tpl);
+    current = tpl;
+    if (d) {
+      data = d.data;
+      stepIndex = d.stepIndex || 0;
+    } else {
+      data = emptyData(tpl);
+      stepIndex = 0;
+    }
     renderStep();
   });
+  renderSavedDocs();
 }
 
 initPicker();
-data = emptyData(current);
+const startDraft = loadDraft(current);
+if (startDraft) {
+  data = startDraft.data;
+  stepIndex = startDraft.stepIndex || 0;
+} else {
+  data = emptyData(current);
+}
 renderStep();
