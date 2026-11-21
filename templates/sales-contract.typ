@@ -24,7 +24,7 @@
   parbreak()
 }
 
-#let doc(data) = {
+#let doc(data: none) = {
   align(center, text(size: 16pt, weight: "bold")[Договор купли-продажи])
   v(0.4em)
   [г. #blank(data.terms.at("place", default: ""))        #blank(data.terms.at("date", default: ""))]
@@ -48,6 +48,8 @@
   v(1.4em)
   [Подписи:]
   v(0.3em)
-  for b in data.buyers { [Покупатель: #blank(b.at("fio", default: ""))] parbreak() }
-  for s in data.sellers { [Продавец: #blank(s.at("fio", default: ""))] parbreak() }
+  for b in data.buyers { [Покупатель: #blank(b.at("fio", default: ""))]
+    parbreak() }
+  for s in data.sellers { [Продавец: #blank(s.at("fio", default: ""))]
+    parbreak() }
 }
