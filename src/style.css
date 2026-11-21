@@ -416,6 +416,75 @@ textarea:focus {
   cursor: progress;
 }
 
+/* ---------------- saved documents ---------------- */
+
+.docs {
+  margin: 0.4rem 1rem 0;
+  border: 1px solid var(--bg2);
+  border-radius: var(--radius-sm);
+  background: var(--bg1);
+}
+
+.docs > summary {
+  cursor: pointer;
+  padding: 0.55rem 0.7rem;
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--fg2);
+  list-style: none;
+}
+
+.docs > summary::-webkit-details-marker {
+  display: none;
+}
+
+.docs > summary::before {
+  content: "▸ ";
+  color: var(--gray);
+}
+
+.docs[open] > summary::before {
+  content: "▾ ";
+}
+
+.docs-body {
+  padding: 0.2rem 0.7rem 0.7rem;
+}
+
+.actions-secondary {
+  padding: 0.4rem 1rem 0;
+}
+
+.actions-secondary .btn {
+  width: 100%;
+}
+
+.src-dump {
+  border: 1px solid var(--red);
+  border-radius: var(--radius-sm);
+  background: var(--bg0);
+  margin-bottom: 0.8rem;
+  font-size: 0.78rem;
+}
+
+.src-dump > summary {
+  cursor: pointer;
+  padding: 0.5rem 0.7rem;
+  color: var(--red);
+  font-weight: 600;
+}
+
+.src-dump pre {
+  margin: 0;
+  padding: 0.6rem 0.7rem;
+  max-height: 40vh;
+  overflow: auto;
+  white-space: pre-wrap;
+  word-break: break-all;
+  color: var(--fg3);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+
 /* ---------------- status ---------------- */
 
 #status {
