@@ -26,7 +26,7 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "XX XX XXXXXX"
+          "placeholder": "серия, номер, кем и когда выдан"
         }
       ]
     },
@@ -54,7 +54,7 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "XX XX XXXXXX"
+          "placeholder": "серия, номер, кем и когда выдан"
         },
         {
           "key": "basis",
@@ -87,7 +87,10 @@
           "label": "Кадастровый номер",
           "type": "text",
           "placeholder": "XX:XX:XXXXXXX:XX"
-        }
+        },
+        { "key": "ownership", "label": "Запись о праве в ЕГРН (номер и дата)", "type": "text", "placeholder": "№ … от …" },
+        { "key": "encumbrances", "label": "Обременения и ограничения", "type": "textarea", "placeholder": "Отсутствуют или перечислите имеющиеся" },
+        { "key": "occupants", "label": "Лица с сохраняемым правом пользования", "type": "textarea", "placeholder": "Отсутствуют или укажите лиц и основание права" }
       ]
     },
     {
@@ -101,19 +104,25 @@
           "required": true,
           "placeholder": "0"
         },
+        { "key": "price_words", "label": "Цена прописью", "type": "text", "placeholder": "например: пять миллионов рублей 00 копеек" },
         {
           "key": "payment",
           "label": "Порядок расчётов",
           "type": "textarea",
-          "placeholder": "например: наличными при подписании договора"
+          "placeholder": "способ, сроки, аккредитив/эскроу и момент подтверждения оплаты"
         },
+        { "key": "transfer", "label": "Срок и условия передачи", "type": "textarea", "placeholder": "срок подписания передаточного акта, ключи, показания счётчиков" },
+        { "key": "condition", "label": "Состояние объекта и недостатки", "type": "textarea", "placeholder": "состояние, остающееся имущество, известные недостатки" },
+        { "key": "assurances", "label": "Дополнительные заверения продавца", "type": "textarea", "placeholder": "например, сведения о браке, согласии супруга, банкротстве" },
+        { "key": "expenses", "label": "Распределение расходов", "type": "text", "placeholder": "кто оплачивает регистрацию и нотариуса" },
+        { "key": "appendices", "label": "Приложения", "type": "textarea", "placeholder": "передаточный акт, опись имущества и др." },
         { "key": "date", "label": "Дата договора", "type": "date" },
         {
           "key": "place",
           "label": "Место заключения",
           "type": "text",
           "placeholder": "г. Москва",
-          "options": ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Краснодар", "Нижний Новгород"]
+          "placeholder": "город, субъект РФ"
         }
       ]
     }

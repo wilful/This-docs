@@ -26,7 +26,7 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "XX XX XXXXXX"
+          "placeholder": "серия, номер, кем и когда выдан"
         }
       ]
     },
@@ -54,7 +54,7 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "XX XX XXXXXX"
+          "placeholder": "серия, номер, кем и когда выдан"
         }
       ]
     },
@@ -72,10 +72,15 @@
         { "key": "vin", "label": "VIN", "type": "text", "placeholder": "17 символов" },
         { "key": "year", "label": "Год выпуска", "type": "number", "placeholder": "2020" },
         { "key": "engine", "label": "Номер двигателя", "type": "text", "placeholder": "…" },
-        { "key": "body", "label": "Номер кузова", "type": "text", "placeholder": "…" },
+        { "key": "body", "label": "Номер кузова / кабины", "type": "text", "placeholder": "…" },
+        { "key": "chassis", "label": "Номер шасси / рамы", "type": "text", "placeholder": "если указан в документах" },
         { "key": "color", "label": "Цвет", "type": "text", "placeholder": "белый" },
         { "key": "plate", "label": "Гос. рег. знак", "type": "text", "placeholder": "А000АА 77" },
-        { "key": "mileage", "label": "Пробег, км", "type": "number", "placeholder": "0" }
+        { "key": "mileage", "label": "Пробег по одометру, км", "type": "number", "placeholder": "0" },
+        { "key": "pts", "label": "ПТС (серия, номер / электронный ПТС)", "type": "text", "placeholder": "реквизиты ПТС или номер ЭПТС" },
+        { "key": "sts", "label": "Свидетельство о регистрации ТС", "type": "text", "placeholder": "серия и номер" },
+        { "key": "ownership", "label": "Документ о праве собственности продавца", "type": "text", "placeholder": "договор, свидетельство о наследстве и т. п." },
+        { "key": "restrictions", "label": "Залог, арест, ограничения, права третьих лиц", "type": "textarea", "placeholder": "Отсутствуют или перечислите сведения" }
       ]
     },
     {
@@ -89,13 +94,19 @@
           "required": true,
           "placeholder": "0"
         },
+        { "key": "price_words", "label": "Цена прописью", "type": "text", "placeholder": "например: один миллион рублей 00 копеек" },
+        { "key": "payment", "label": "Порядок и срок оплаты", "type": "textarea", "placeholder": "наличные / перевод, срок и подтверждение расчёта" },
+        { "key": "transfer", "label": "Срок, время и место передачи", "type": "text", "placeholder": "дата, время, место" },
+        { "key": "condition", "label": "Состояние, недостатки и комплектность", "type": "textarea", "placeholder": "известные недостатки, оборудование, комплект ключей" },
+        { "key": "spouse", "label": "Семейное положение / согласие супруга", "type": "textarea", "placeholder": "укажите применимые обстоятельства и реквизиты согласия" },
+        { "key": "appendices", "label": "Приложения", "type": "textarea", "placeholder": "акт приёма-передачи, расписка, опись" },
         { "key": "date", "label": "Дата договора", "type": "date" },
         {
           "key": "place",
           "label": "Место заключения",
           "type": "text",
           "placeholder": "г. Москва",
-          "options": ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Краснодар", "Нижний Новгород"]
+          "placeholder": "город, субъект РФ"
         }
       ]
     }
