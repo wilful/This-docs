@@ -433,7 +433,12 @@ function validateData(tpl) {
 // ---- Typst source generation ----
 
 function typstStr(v) {
-  return JSON.stringify(String(v ?? ""));
+  let s = String(v ?? "");
+  // Drop control characters that JSON would escape as \b \f \uXXXX — Typst
+  // string literals reject those escapes and fail to parse the generated
+  // source. Tab/newline/carriage-return are kept (Typst supports \t \n \r).
+  s = s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
+  return JSON.stringify(s);
 }
 
 function typstDict(o) {
@@ -444,9 +449,18 @@ function typstDict(o) {
 function buildSource(tpl, values) {
   if (isGrouped(tpl)) {
     const entries = getGroups(tpl).map((g) => {
-      const val = g.repeatable
-        ? `( ${((values[g.id]) || []).map((r) => typstDict(r)).join(", ")} )`
-        : typstDict(values[g.id] || {});
+      let val;
+      if (g.repeatable) {
+        const dicts = ((values[g.id]) || []).map((r) => typstDict(r));
+        // Always emit a tuple so the doc function can iterate it, even with a
+        // single party: a lone parenthesised dict parses as a dict, not an
+        // array. A trailing comma forces a 1-tuple.
+        val = dicts.length
+          ? `( ${dicts.join(", ")}${dicts.length === 1 ? "," : ""} )`
+          : "( )";
+      } else {
+        val = typstDict(values[g.id] || {});
+      }
       return `  ${g.id}: ${val}`;
     });
     return `${tpl.typ}\n\n#doc(\n  data: (\n${entries.join(",\n")}\n  )\n)\n`;
