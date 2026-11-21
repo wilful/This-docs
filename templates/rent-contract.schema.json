@@ -1,0 +1,89 @@
+{
+  "id": "rent-contract",
+  "name": "Договор аренды жилого помещения",
+  "description": "Квартира, дом или комната: арендодатель и арендатор, объект, срок и арендная плата.",
+  "groups": [
+    {
+      "id": "landlords",
+      "title": "Арендодатель",
+      "repeatable": true,
+      "fields": [
+        { "key": "fio", "label": "ФИО", "type": "text", "required": true, "placeholder": "Иванов Иван Иванович", "autocomplete": "name" },
+        { "key": "birthdate", "label": "Дата рождения", "type": "date" },
+        { "key": "passport_series", "label": "Паспорт: серия", "type": "text", "placeholder": "0000" },
+        { "key": "passport_number", "label": "Паспорт: номер", "type": "text", "placeholder": "000000" },
+        { "key": "passport_issued", "label": "Кем выдан", "type": "text" },
+        { "key": "passport_code", "label": "Код подразделения", "type": "text", "placeholder": "000-000" },
+        { "key": "passport_date", "label": "Дата выдачи паспорта", "type": "date" },
+        { "key": "address", "label": "Адрес регистрации", "type": "text", "placeholder": "город, улица, дом, квартира" },
+        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" }
+      ]
+    },
+    {
+      "id": "tenants",
+      "title": "Арендатор",
+      "repeatable": true,
+      "fields": [
+        { "key": "fio", "label": "ФИО", "type": "text", "required": true, "placeholder": "Петров Пётр Петрович", "autocomplete": "name" },
+        { "key": "birthdate", "label": "Дата рождения", "type": "date" },
+        { "key": "passport_series", "label": "Паспорт: серия", "type": "text", "placeholder": "0000" },
+        { "key": "passport_number", "label": "Паспорт: номер", "type": "text", "placeholder": "000000" },
+        { "key": "passport_issued", "label": "Кем выдан", "type": "text" },
+        { "key": "passport_code", "label": "Код подразделения", "type": "text", "placeholder": "000-000" },
+        { "key": "passport_date", "label": "Дата выдачи паспорта", "type": "date" },
+        { "key": "address", "label": "Адрес регистрации", "type": "text", "placeholder": "город, улица, дом, квартира" },
+        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" }
+      ]
+    },
+    {
+      "id": "housing",
+      "title": "Жилое помещение",
+      "fields": [
+        {
+          "key": "housing_type",
+          "label": "Вид жилого помещения",
+          "type": "select",
+          "options": ["Квартира", "Жилой дом", "Комната", "Часть квартиры", "Иное"],
+          "placeholder": "Выберите"
+        },
+        { "key": "address", "label": "Адрес жилого помещения", "type": "text", "required": true, "placeholder": "город, улица, дом, квартира", "autocomplete": "street-address" },
+        { "key": "area", "label": "Общая площадь, кв. м", "type": "number", "placeholder": "0" },
+        { "key": "living_area", "label": "Жилая площадь, кв. м", "type": "number", "placeholder": "0" },
+        { "key": "rooms", "label": "Количество комнат", "type": "number", "placeholder": "2" },
+        { "key": "floor", "label": "Этаж / этажность", "type": "text", "placeholder": "5 из 9" },
+        { "key": "cadastral", "label": "Кадастровый номер", "type": "text", "placeholder": "XX:XX:XXXXXXX:XX" },
+        { "key": "ownership", "label": "Право собственности подтверждается", "type": "textarea", "placeholder": "выписка ЕГРН, договор, свидетельство от …" },
+        { "key": "encumbrances", "label": "Ограничения и обременения", "type": "textarea", "placeholder": "Отсутствуют или перечислите имеющиеся" }
+      ]
+    },
+    {
+      "id": "terms",
+      "title": "Срок, оплата и условия",
+      "fields": [
+        { "key": "start_date", "label": "Срок аренды: с", "type": "date" },
+        { "key": "end_date", "label": "Срок аренды: по", "type": "date" },
+        { "key": "notice_days", "label": "Срок уведомления о расторжении, дней", "type": "number", "placeholder": "30" },
+        { "key": "rent", "label": "Арендная плата в месяц, руб.", "type": "number", "required": true, "placeholder": "0" },
+        { "key": "rent_words", "label": "Арендная плата прописью", "type": "text", "placeholder": "сорок тысяч рублей 00 копеек" },
+        { "key": "deposit", "label": "Обеспечительный платёж, руб.", "type": "number", "placeholder": "0" },
+        { "key": "payment_terms", "label": "Порядок и сроки оплаты", "type": "textarea", "placeholder": "например: не позднее 5-го числа, наличными или переводом" },
+        { "key": "utilities", "label": "Коммунальные и иные платежи", "type": "textarea", "placeholder": "кто оплачивает: арендная плата включает или нет" },
+        { "key": "condition", "label": "Состояние Помещения и известные недостатки", "type": "textarea", "placeholder": "состояние, ремонт, недостатки" },
+        { "key": "property", "label": "Перечень мебели, техники и иного имущества", "type": "textarea", "placeholder": "опись имущества или ссылка на приложение" },
+        { "key": "residents", "label": "Лица, проживающие совместно с Арендатором", "type": "textarea", "placeholder": "Отсутствуют или ФИО и степень родства" },
+        {
+          "key": "pets",
+          "label": "Домашние животные",
+          "type": "select",
+          "options": ["Не допускаются", "Допускаются", "Допускаются с письменного согласия Арендодателя"],
+          "placeholder": "Выберите"
+        },
+        { "key": "repairs", "label": "Текущий ремонт и улучшения", "type": "textarea", "placeholder": "кто и что делает, согласование перепланировки" },
+        { "key": "additional", "label": "Дополнительные условия", "type": "textarea", "placeholder": "например: сохранение регистрации, порядок выезда" },
+        { "key": "appendices", "label": "Приложения", "type": "textarea", "placeholder": "акт приёма-передачи, опись имущества и др." },
+        { "key": "date", "label": "Дата договора", "type": "date", "required": true },
+        { "key": "place", "label": "Место заключения договора", "type": "text", "placeholder": "город" }
+      ]
+    }
+  ]
+}

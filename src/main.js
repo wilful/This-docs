@@ -705,13 +705,16 @@ function renderStep() {
   saveDraft();
 }
 
+// Group ids whose values are people: the signature step offers a pad per party.
+const PARTY_GROUP_IDS = ["sellers", "buyers", "landlords", "tenants"];
+
 function renderSignatureStep(card) {
   const intro = document.createElement("p");
   intro.className = "muted signature-note";
   intro.textContent = "При желании нарисуйте подпись пальцем или мышью. Она будет добавлена в PDF как изображение; это не криптографическая электронная подпись. Подпись необязательна.";
   card.appendChild(intro);
 
-  const partyGroups = getGroups(current).filter((g) => ["sellers", "buyers"].includes(g.id));
+  const partyGroups = getGroups(current).filter((g) => PARTY_GROUP_IDS.includes(g.id));
   for (const g of partyGroups) {
     const parties = g.repeatable
       ? (data[g.id] || []).map((party, index) => ({ party, index }))
