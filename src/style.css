@@ -664,6 +664,80 @@ main#step {
   padding: 1.1rem 1.15rem 1.25rem;
 }
 
+/* ---------------- drawn signatures ---------------- */
+
+.signature-note {
+  margin-top: 0.65rem;
+}
+
+.signature-group-title {
+  margin: 1.35rem 0 0.55rem;
+  color: var(--blue);
+  font-family: var(--font-doc);
+  font-size: 1rem;
+}
+
+.signature-item {
+  margin-top: 0.75rem;
+  padding: 0.8rem;
+  border: 1px solid var(--bg3);
+  border-radius: var(--radius-sm);
+  background: var(--bg0);
+}
+
+.signature-item h4 {
+  margin: 0 0 0.55rem;
+  color: var(--fg1);
+  font-size: 0.88rem;
+}
+
+.signature-canvas {
+  display: block;
+  width: 100%;
+  height: 150px;
+  min-height: 0;
+  padding: 0;
+  border: 1px dashed var(--bg4);
+  border-radius: var(--radius-sm);
+  background: #fbf1c7;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+.signature-canvas:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.signature-current {
+  display: grid;
+  gap: 0.25rem;
+  margin-top: 0.65rem;
+  color: var(--muted);
+  font-size: 0.75rem;
+}
+
+.signature-current img {
+  width: min(100%, 320px);
+  height: 72px;
+  padding: 0.25rem;
+  border-radius: 4px;
+  background: #fbf1c7;
+  object-fit: contain;
+}
+
+.signature-replace-note {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+}
+
+.signature-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
 .group-title {
   margin: 0 0 0.2rem;
   color: var(--fg0);

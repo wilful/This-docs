@@ -282,14 +282,14 @@ function showStartScreen() {
 
 function openTemplate(tpl) {
   if (!els.editorScreen.hidden) {
-    writeStep(getGroups(current)[stepIndex]);
+    writeStep(getWizardGroups(current)[stepIndex]);
     saveDraft();
   }
   current = tpl;
   els.tpl.value = tpl.id;
   const draft = loadDraft(tpl);
   data = draft ? cloneData(draft.data) : emptyData(tpl);
-  stepIndex = draft ? Math.min(draft.stepIndex || 0, getGroups(tpl).length - 1) : 0;
+  stepIndex = draft ? Math.min(draft.stepIndex || 0, getWizardGroups(tpl).length - 1) : 0;
   showEditor();
   els.status.hidden = false;
   setStatus("");
@@ -324,6 +324,13 @@ function getGroups(tpl) {
       title: tpl.schema.name || "Поля",
       fields: tpl.schema.fields,
     },
+  ];
+}
+
+function getWizardGroups(tpl) {
+  return [
+    ...getGroups(tpl),
+    { id: "_signatures", title: "Подписи сторон", signatures: true, fields: [] },
   ];
 }
 
@@ -611,9 +618,11 @@ function buildSavedLoader(g) {
 }
 
 function buildRep(g, index, values) {
+  values._partyId ||= `party_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
   const rep = document.createElement("div");
   rep.className = "rep";
   rep.dataset.rep = index;
+  rep.dataset.partyId = values._partyId;
 
   const head = document.createElement("div");
   head.className = "rep-head";
@@ -647,7 +656,7 @@ function buildRep(g, index, values) {
 // ---- step rendering ----
 
 function renderStep() {
-  const groups = getGroups(current);
+  const groups = getWizardGroups(current);
   const g = groups[stepIndex];
 
   els.brandTitle.textContent = current.schema.name;
@@ -663,7 +672,9 @@ function renderStep() {
   title.textContent = g.title;
   card.appendChild(title);
 
-  if (g.repeatable) {
+  if (g.signatures) {
+    renderSignatureStep(card);
+  } else if (g.repeatable) {
     const reps = data[g.id] || [];
     if (reps.length === 0) {
       const empty = document.createElement("p");
@@ -692,6 +703,163 @@ function renderStep() {
   renderActions(groups);
   els.step.scrollTop = 0;
   saveDraft();
+}
+
+function renderSignatureStep(card) {
+  const intro = document.createElement("p");
+  intro.className = "muted signature-note";
+  intro.textContent = "При желании нарисуйте подпись пальцем или мышью. Она будет добавлена в PDF как изображение; это не криптографическая электронная подпись. Подпись необязательна.";
+  card.appendChild(intro);
+
+  const partyGroups = getGroups(current).filter((g) => g.repeatable && ["sellers", "buyers"].includes(g.id));
+  for (const g of partyGroups) {
+    const parties = data[g.id] || [];
+    if (!parties.length) continue;
+    const heading = document.createElement("h3");
+    heading.className = "signature-group-title";
+    heading.textContent = g.title;
+    card.appendChild(heading);
+
+    parties.forEach((party, index) => {
+      const item = document.createElement("section");
+      item.className = "signature-item";
+      const label = document.createElement("h4");
+      label.textContent = `${g.title} №${index + 1}${party.fio ? ` — ${party.fio}` : ""}`;
+      item.appendChild(label);
+
+      if (party.signature) {
+        const preview = document.createElement("div");
+        preview.className = "signature-current";
+        const previewLabel = document.createElement("span");
+        previewLabel.textContent = "Текущая подпись в документе";
+        const image = document.createElement("img");
+        image.src = `data:image/svg+xml,${encodeURIComponent(party.signature)}`;
+        image.alt = `Подпись ${party.fio || `${g.title} №${index + 1}`}`;
+        preview.append(previewLabel, image);
+        item.appendChild(preview);
+        const replaceNote = document.createElement("p");
+        replaceNote.className = "muted signature-replace-note";
+        replaceNote.textContent = "Чтобы заменить подпись, нарисуйте новую ниже и нажмите «Сохранить подпись».";
+        item.appendChild(replaceNote);
+      }
+
+      const canvas = document.createElement("canvas");
+      canvas.className = "signature-canvas";
+      canvas.width = 640;
+      canvas.height = 180;
+      canvas.setAttribute("aria-label", `Поле для рисования подписи: ${g.title} №${index + 1}`);
+      item.appendChild(canvas);
+
+      const actions = document.createElement("div");
+      actions.className = "signature-actions";
+      const clear = document.createElement("button");
+      clear.type = "button";
+      clear.className = "btn-sm";
+      clear.textContent = "Очистить поле";
+      clear.disabled = true;
+      const save = document.createElement("button");
+      save.type = "button";
+      save.className = "btn-sm signature-save";
+      save.textContent = "Сохранить подпись";
+      save.disabled = true;
+      const remove = document.createElement("button");
+      remove.type = "button";
+      remove.className = "btn-sm btn-danger";
+      remove.textContent = "Убрать подпись из PDF";
+      remove.hidden = !party.signature;
+      actions.append(save, clear, remove);
+      item.appendChild(actions);
+      card.appendChild(item);
+
+      attachSignatureCanvas(canvas, save, clear, remove, g.id, index);
+    });
+  }
+}
+
+function attachSignatureCanvas(canvas, saveButton, clearButton, removeButton, groupId, partyIndex) {
+  const ctx = canvas.getContext("2d");
+  const strokes = [];
+  let activeStroke = null;
+
+  const pointFromEvent = (event) => {
+    const rect = canvas.getBoundingClientRect();
+    return {
+      x: ((event.clientX - rect.left) / rect.width) * canvas.width,
+      y: ((event.clientY - rect.top) / rect.height) * canvas.height,
+    };
+  };
+
+  const redraw = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.strokeStyle = "#282828";
+    ctx.lineWidth = 4;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const stroke of strokes) {
+      if (!stroke.length) continue;
+      ctx.beginPath();
+      ctx.moveTo(stroke[0].x, stroke[0].y);
+      for (const point of stroke.slice(1)) ctx.lineTo(point.x, point.y);
+      if (stroke.length === 1) ctx.lineTo(stroke[0].x + 0.1, stroke[0].y + 0.1);
+      ctx.stroke();
+    }
+  };
+
+  const save = () => {
+    const paths = strokes.filter((stroke) => stroke.length).map((stroke) => {
+      const first = stroke[0];
+      const rest = stroke.slice(1).map((point) => `L ${point.x.toFixed(1)} ${point.y.toFixed(1)}`).join(" ");
+      const end = rest || `L ${(first.x + 0.1).toFixed(1)} ${(first.y + 0.1).toFixed(1)}`;
+      return `<path d="M ${first.x.toFixed(1)} ${first.y.toFixed(1)} ${end}"/>`;
+    });
+    const parties = data[groupId] || [];
+    if (!parties[partyIndex]) return;
+    parties[partyIndex].signature = paths.length
+      ? `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 180"><g fill="none" stroke="#282828" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">${paths.join("")}</g></svg>`
+      : "";
+    removeButton.hidden = !parties[partyIndex].signature;
+    saveDraft();
+    setStatus("Подпись сохранена в черновике этого документа.");
+    renderStep();
+  };
+
+  canvas.addEventListener("pointerdown", (event) => {
+    event.preventDefault();
+    canvas.setPointerCapture(event.pointerId);
+    activeStroke = [pointFromEvent(event)];
+    strokes.push(activeStroke);
+    redraw();
+    clearButton.disabled = false;
+    saveButton.disabled = false;
+  });
+  canvas.addEventListener("pointermove", (event) => {
+    if (!activeStroke) return;
+    const point = pointFromEvent(event);
+    const previous = activeStroke[activeStroke.length - 1];
+    if (Math.hypot(point.x - previous.x, point.y - previous.y) >= 2.5) activeStroke.push(point);
+    redraw();
+    clearButton.disabled = false;
+    saveButton.disabled = false;
+  });
+  const finish = () => {
+    if (!activeStroke) return;
+    activeStroke = null;
+  };
+  canvas.addEventListener("pointerup", finish);
+  canvas.addEventListener("pointercancel", finish);
+  clearButton.addEventListener("click", () => {
+    strokes.length = 0;
+    redraw();
+    clearButton.disabled = true;
+    saveButton.disabled = true;
+  });
+  saveButton.addEventListener("click", save);
+  removeButton.addEventListener("click", () => {
+    data[groupId][partyIndex].signature = "";
+    removeButton.hidden = true;
+    saveDraft();
+    renderStep();
+  });
 }
 
 function renderSteps(groups) {
@@ -735,14 +903,15 @@ function renderActions(groups) {
 
 function gotoStep(target) {
   if (target === stepIndex) return;
-  if (target > stepIndex && !validateStep(getGroups(current)[stepIndex])) return;
-  writeStep(getGroups(current)[stepIndex]);
+  const groups = getWizardGroups(current);
+  if (target > stepIndex && !validateStep(groups[stepIndex])) return;
+  writeStep(groups[stepIndex]);
   stepIndex = target;
   renderStep();
 }
 
 els.next.addEventListener("click", () => {
-  const groups = getGroups(current);
+  const groups = getWizardGroups(current);
   if (!validateStep(groups[stepIndex])) return;
   writeStep(groups[stepIndex]);
   if (stepIndex < groups.length - 1) {
@@ -755,13 +924,13 @@ els.next.addEventListener("click", () => {
 
 els.back.addEventListener("click", () => {
   if (stepIndex === 0) return;
-  writeStep(getGroups(current)[stepIndex]);
+  writeStep(getWizardGroups(current)[stepIndex]);
   stepIndex--;
   renderStep();
 });
 
 els.home.addEventListener("click", () => {
-  writeStep(getGroups(current)[stepIndex]);
+  writeStep(getWizardGroups(current)[stepIndex]);
   saveDraft();
   setStatus("");
   showStartScreen();
@@ -801,10 +970,15 @@ els.save.addEventListener("click", () => {
 // ---- read / write current step to state ----
 
 function writeStep(g) {
+  if (g.signatures) return;
   if (g.repeatable) {
     const reps = [...els.step.querySelectorAll("[data-rep]")];
+    const existing = data[g.id] || [];
     data[g.id] = reps.map((rep) => {
       const o = {};
+      const previous = existing.find((party) => party._partyId === rep.dataset.partyId);
+      o._partyId = rep.dataset.partyId;
+      if (previous?.signature) o.signature = previous.signature;
       for (const f of g.fields) {
         const el = rep.querySelector(`[data-key="${f.key}"]`);
         o[f.key] = el ? el.value : "";
@@ -940,7 +1114,7 @@ function buildFieldTypeMap(tpl) {
 }
 
 function typstDict(o, typeMap) {
-  const parts = Object.entries(o).map(([k, v]) => {
+  const parts = Object.entries(o).filter(([k]) => k !== "_partyId").map(([k, v]) => {
     const f = typeMap?.[k];
     let val = v;
     if (f && f.type === "date" && v) val = ruDateDisplay(v);
@@ -995,7 +1169,7 @@ function pdfFilename(tpl, values) {
 // ---- PDF export ----
 
 async function exportPdf() {
-  writeStep(getGroups(current)[stepIndex]);
+  writeStep(getWizardGroups(current)[stepIndex]);
   const err = validateData(current);
   if (err) {
     setStatus(err, true);

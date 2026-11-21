@@ -7,6 +7,10 @@
 #let rule() = line(length: 100%, stroke: (paint: rgb("d79921"), thickness: 1pt))
 #let val(v) = if v == "" or v == none { line(length: 6em, stroke: 0.5pt) } else { str(v) }
 #let fld(label, v) = [#strong[#label:] #val(v)]
+#let signature(p) = {
+  let s = p.at("signature", default: "")
+  if s == "" { line(length: 5em, stroke: 0.5pt) } else { box(image(bytes(s), format: "svg", width: 5em, height: 1.5em, fit: "contain")) }
+}
 #let heading(title) = [#v(0.45em)#text(size: 10.5pt, weight: "bold")[#title]#v(0.15em)]
 #let party(title, p) = block(inset: (x: 8pt, y: 6pt), stroke: (paint: rgb("d5c4a1"), thickness: 0.5pt))[
   #strong[#title]
@@ -107,8 +111,8 @@
   fld("Приложения", data.terms.at("appendices", default: ""))
 
   heading("7. ПОДПИСИ СТОРОН")
-  for s in data.sellers { party("Продавец", s); v(0.25em); [Подпись: #line(length: 5em, stroke: 0.5pt)]; v(0.3em) }
-  for b in data.buyers { party("Покупатель", b); v(0.25em); [Подпись: #line(length: 5em, stroke: 0.5pt)]; v(0.3em) }
+  for s in data.sellers { party("Продавец", s); v(0.25em); [Подпись: #signature(s)]; v(0.3em) }
+  for b in data.buyers { party("Покупатель", b); v(0.25em); [Подпись: #signature(b)]; v(0.3em) }
   v(0.3em)
   align(center, text(size: 8pt, fill: rgb("7c6f64"))[Перед сделкой проверьте документы на автомобиль и сведения о залоге и ограничениях.])
 }
