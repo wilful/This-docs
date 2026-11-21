@@ -788,6 +788,18 @@ function buildSource(tpl, values) {
   return `${tpl.typ}\n\n#doc(\n${args}\n)\n`;
 }
 
+function pdfFilename(tpl, values) {
+  const terms = values.terms || {};
+  const date = ruDateDisplay(terms.date || todayISO());
+  const vehicle = values.vehicle?.model?.trim();
+  const subject = tpl.id === "car-contract" && vehicle ? ` — ${vehicle}` : "";
+  const raw = `${tpl.schema.name}${subject} — ${date}`;
+  return raw
+    .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
+    .replace(/\s+/g, " ")
+    .replace(/[. ]+$/g, "") + ".pdf";
+}
+
 // ---- PDF export ----
 
 async function exportPdf() {
@@ -809,9 +821,9 @@ async function exportPdf() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `${current.id}.pdf`;
+    a.download = pdfFilename(current, data);
     a.click();
-    URL.revokeObjectURL(url);
+    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
     addDoc(current, data);
     setStatus("Готово — PDF скачан и сохранён в «Мои документы».");
   } catch (e) {

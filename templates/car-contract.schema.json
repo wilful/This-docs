@@ -105,7 +105,6 @@
           "key": "place",
           "label": "Место заключения",
           "type": "text",
-          "placeholder": "г. Москва",
           "placeholder": "город, субъект РФ"
         }
       ]
