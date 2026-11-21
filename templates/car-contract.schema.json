@@ -1,0 +1,103 @@
+{
+  "id": "car-contract",
+  "name": "Договор купли-продажи автомобиля",
+  "groups": [
+    {
+      "id": "sellers",
+      "title": "Продавец",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "fio",
+          "label": "ФИО",
+          "type": "text",
+          "required": true,
+          "placeholder": "Иванов Иван Иванович",
+          "autocomplete": "name"
+        },
+        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" },
+        {
+          "key": "address",
+          "label": "Адрес регистрации",
+          "type": "text",
+          "placeholder": "г. …, ул. …, д. …"
+        },
+        {
+          "key": "passport",
+          "label": "Паспорт",
+          "type": "text",
+          "placeholder": "XX XX XXXXXX"
+        }
+      ]
+    },
+    {
+      "id": "buyers",
+      "title": "Покупатель",
+      "repeatable": true,
+      "fields": [
+        {
+          "key": "fio",
+          "label": "ФИО",
+          "type": "text",
+          "required": true,
+          "placeholder": "Петров Пётр Петрович",
+          "autocomplete": "name"
+        },
+        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" },
+        {
+          "key": "address",
+          "label": "Адрес регистрации",
+          "type": "text",
+          "placeholder": "г. …, ул. …, д. …"
+        },
+        {
+          "key": "passport",
+          "label": "Паспорт",
+          "type": "text",
+          "placeholder": "XX XX XXXXXX"
+        }
+      ]
+    },
+    {
+      "id": "vehicle",
+      "title": "Автомобиль",
+      "fields": [
+        {
+          "key": "model",
+          "label": "Марка и модель",
+          "type": "text",
+          "required": true,
+          "placeholder": "Lada Vesta"
+        },
+        { "key": "vin", "label": "VIN", "type": "text", "placeholder": "17 символов" },
+        { "key": "year", "label": "Год выпуска", "type": "number", "placeholder": "2020" },
+        { "key": "engine", "label": "Номер двигателя", "type": "text", "placeholder": "…" },
+        { "key": "body", "label": "Номер кузова", "type": "text", "placeholder": "…" },
+        { "key": "color", "label": "Цвет", "type": "text", "placeholder": "белый" },
+        { "key": "plate", "label": "Гос. рег. знак", "type": "text", "placeholder": "А000АА 77" },
+        { "key": "mileage", "label": "Пробег, км", "type": "number", "placeholder": "0" }
+      ]
+    },
+    {
+      "id": "terms",
+      "title": "Условия и дата",
+      "fields": [
+        {
+          "key": "price",
+          "label": "Цена, руб.",
+          "type": "number",
+          "required": true,
+          "placeholder": "0"
+        },
+        { "key": "date", "label": "Дата договора", "type": "date" },
+        {
+          "key": "place",
+          "label": "Место заключения",
+          "type": "text",
+          "placeholder": "г. Москва",
+          "options": ["Москва", "Санкт-Петербург", "Новосибирск", "Екатеринбург", "Казань", "Краснодар", "Нижний Новгород"]
+        }
+      ]
+    }
+  ]
+}

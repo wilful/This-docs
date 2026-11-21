@@ -9,22 +9,22 @@
 //    `doc(data: (<group_id>: <dict|array>, ...))`.
 //  - Legacy flat: { id, name, fields: [...] }. Rendered as a single step with
 //    the call `doc(key: "value", ...)`.
-import exampleTyp from "../templates/example.typ?raw";
-import exampleSchema from "../templates/example.schema.json";
 import salesTyp from "../templates/sales-contract.typ?raw";
 import salesSchema from "../templates/sales-contract.schema.json";
+import carTyp from "../templates/car-contract.typ?raw";
+import carSchema from "../templates/car-contract.schema.json";
 
 export const templates = [
-  {
-    id: exampleSchema.id,
-    name: exampleSchema.name,
-    typ: exampleTyp,
-    schema: exampleSchema,
-  },
   {
     id: salesSchema.id,
     name: salesSchema.name,
     typ: salesTyp,
     schema: salesSchema,
+  },
+  {
+    id: carSchema.id,
+    name: carSchema.name,
+    typ: carTyp,
+    schema: carSchema,
   },
 ];
