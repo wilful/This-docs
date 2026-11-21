@@ -1,0 +1,112 @@
+:root {
+  /* Gruvbox dark palette */
+  --bg: #282828;
+  --bg1: #3c3836;
+  --bg2: #504945;
+  --fg: #ebdbb2;
+  --gray: #a89984;
+  --red: #fb4934;
+  --green: #b8bb26;
+  --yellow: #fabd2f;
+  --blue: #83a598;
+  --purple: #d3869b;
+  --aqua: #8ec07c;
+  --orange: #fe8019;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  padding: 2rem 1rem;
+  background: var(--bg);
+  color: var(--fg);
+  font-family: "New Computer Modern", "Liberation Serif", Georgia, serif;
+  line-height: 1.5;
+}
+
+main {
+  max-width: 640px;
+  margin: 0 auto;
+  background: var(--bg1);
+  border: 1px solid var(--bg2);
+  border-radius: 12px;
+  padding: 1.5rem 1.75rem;
+}
+
+h1 {
+  margin: 0 0 0.25rem;
+  font-size: 1.6rem;
+  color: var(--orange);
+}
+
+.sub {
+  margin: 0 0 1.25rem;
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+label {
+  display: block;
+  margin: 0.9rem 0 0.3rem;
+  color: var(--yellow);
+  font-weight: bold;
+}
+
+select,
+input[type="text"],
+input[type="date"] {
+  width: 100%;
+  padding: 0.55rem 0.65rem;
+  background: var(--bg);
+  color: var(--fg);
+  border: 1px solid var(--bg2);
+  border-radius: 8px;
+  font-size: 1rem;
+  font-family: inherit;
+}
+
+input:focus,
+select:focus {
+  outline: none;
+  border-color: var(--blue);
+}
+
+#form label:first-child {
+  margin-top: 1.25rem;
+}
+
+button {
+  margin-top: 1.5rem;
+  width: 100%;
+  padding: 0.7rem 1rem;
+  background: var(--green);
+  color: var(--bg);
+  border: none;
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: bold;
+  cursor: pointer;
+}
+
+button:hover {
+  background: var(--aqua);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+#status {
+  min-height: 1.4rem;
+  margin: 0.9rem 0 0;
+  color: var(--blue);
+  font-size: 0.95rem;
+}
+
+#status.error {
+  color: var(--red);
+}
