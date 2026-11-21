@@ -664,7 +664,12 @@ async function exportPdf() {
     setStatus("Готово — PDF скачан.");
   } catch (e) {
     console.error(e);
-    setStatus("Ошибка компиляции: " + (e?.message || e), true);
+    // Dump the exact source we tried to compile so the failure is diagnosable.
+    // Check the console (F12): if you see `str(n) + ". "` in the template,
+    // the new code is live; if you still see `[#(n). ]`, the build is stale.
+    console.error("[typst source]\n" + source);
+    window.__lastTypstSource = source;
+    setStatus("Ошибка компиляции — исходник в консоли (F12): window.__lastTypstSource", true);
   } finally {
     els.next.disabled = false;
     els.back.disabled = false;
