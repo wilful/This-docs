@@ -559,6 +559,7 @@ function renderSteps(groups) {
     title.className = "title";
     title.textContent = g.title;
     chip.append(num, title);
+    chip.setAttribute("aria-label", `Раздел ${i + 1}: ${g.title}`);
     if (i === stepIndex) chip.setAttribute("aria-current", "step");
     else if (i < stepIndex) chip.classList.add("done");
     chip.addEventListener("click", () => gotoStep(i));
