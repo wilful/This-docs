@@ -1,6 +1,6 @@
 {
   "id": "sales-contract",
-  "name": "Договор купли-продажи",
+  "name": "Договор купли-продажи недвижимости",
   "groups": [
     {
       "id": "buyers",
@@ -15,7 +15,7 @@
           "placeholder": "Иванов Иван Иванович",
           "autocomplete": "name"
         },
-        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 …" },
+        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" },
         {
           "key": "address",
           "label": "Адрес регистрации",
@@ -26,7 +26,7 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "серия, номер, кем выдан"
+          "placeholder": "XX XX XXXXXX"
         }
       ]
     },
@@ -43,7 +43,7 @@
           "placeholder": "Петров Пётр Петрович",
           "autocomplete": "name"
         },
-        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 …" },
+        { "key": "phone", "label": "Телефон", "type": "tel", "placeholder": "+7 (___) ___-__-__" },
         {
           "key": "address",
           "label": "Адрес регистрации",
@@ -54,7 +54,13 @@
           "key": "passport",
           "label": "Паспорт",
           "type": "text",
-          "placeholder": "серия, номер, кем выдан"
+          "placeholder": "XX XX XXXXXX"
+        },
+        {
+          "key": "basis",
+          "label": "Основание права",
+          "type": "text",
+          "placeholder": "выписка ЕГРН, договор от …"
         }
       ]
     },
@@ -66,7 +72,7 @@
           "key": "object_type",
           "label": "Тип объекта",
           "type": "select",
-          "options": ["Квартира", "Дом", "Земельный участок", "Иное"],
+          "options": ["Квартира", "Жилой дом", "Земельный участок", "Нежилое помещение", "Иное"],
           "placeholder": "Выберите"
         },
         {
@@ -75,12 +81,12 @@
           "type": "text",
           "placeholder": "г. …, ул. …, д. …"
         },
-        { "key": "area", "label": "Площадь, кв.м", "type": "number", "placeholder": "0" },
+        { "key": "area", "label": "Площадь, кв. м", "type": "number", "placeholder": "0" },
         {
           "key": "cadastral",
           "label": "Кадастровый номер",
           "type": "text",
-          "placeholder": "…-…-…"
+          "placeholder": "XX:XX:XXXXXXX:XX"
         }
       ]
     },
@@ -94,6 +100,12 @@
           "type": "number",
           "required": true,
           "placeholder": "0"
+        },
+        {
+          "key": "payment",
+          "label": "Порядок расчётов",
+          "type": "textarea",
+          "placeholder": "например: наличными при подписании договора"
         },
         { "key": "date", "label": "Дата договора", "type": "date" },
         {
