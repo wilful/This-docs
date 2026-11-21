@@ -502,6 +502,31 @@ h3 {
   line-height: 1.55;
 }
 
+/* Плашка «сделано с помощью VoiceIDE». */
+.made-with {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0.9rem 0 0;
+  padding: 0.4rem 0.75rem;
+  border: 1px solid var(--bg3);
+  border-radius: 999px;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.made-with a {
+  color: var(--fg0);
+  text-decoration-color: var(--bg4);
+  text-underline-offset: 3px;
+}
+
+.made-with a:hover {
+  color: var(--orange);
+  text-decoration-color: var(--orange);
+}
+
 /* ---------------- editor ---------------- */
 
 .editor-screen {
