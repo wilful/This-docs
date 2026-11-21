@@ -131,6 +131,9 @@ select.tpl:focus-visible {
   padding: 0.8rem 1rem;
   overflow-x: auto;
   scrollbar-width: none;
+  /* min-width:0 is required: as a flex child of the column .wrap it would
+     otherwise refuse to shrink below its content and overflow the layout. */
+  min-width: 0;
   background: var(--bg0-hard);
   border-bottom: 1px solid var(--bg2);
 }

@@ -14,7 +14,10 @@
 }
 
 #let party(n, p) = {
-  let tag = if n != none { [#(n). ] } else { [] }
+  // Keep the trailing ". " inside a string so it is never parsed as a field
+  // access after the code expression (which caused "expected semicolon or
+  // line break"). Injecting the string renders it as plain text.
+  let tag = if n != none { str(n) + ". " } else { "" }
   [#tag ФИО: #blank(p.at("fio", default: "")), тел.: #blank(p.at("phone", default: "")),]
   parbreak()
   [адрес: #blank(p.at("address", default: "")), паспорт: #blank(p.at("passport", default: ""))]
