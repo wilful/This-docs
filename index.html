@@ -8,10 +8,10 @@
   <body>
     <div class="wrap">
       <header>
-        <button id="home" type="button" class="home-btn" aria-label="К выбору шаблона" title="К выбору шаблона">←</button>
+        <button id="home" type="button" class="home-btn" aria-label="К выбору шаблона" title="К выбору шаблона" hidden>←</button>
         <div class="brand" id="brand">
-          <h1 id="brand-title">Документы</h1>
-          <p id="brand-subtitle">Конструктор договоров</p>
+          <h1 id="brand-title">Выберите шаблон</h1>
+          <p id="brand-subtitle">Готовые документы для заполнения</p>
         </div>
         <details class="tools-menu">
           <summary aria-label="Действия с данными" title="Действия с данными">
@@ -30,33 +30,45 @@
         </details>
       </header>
 
-      <div class="template-row">
-        <label for="template">Шаблон</label>
-        <select id="template" class="tpl"></select>
-      </div>
+      <p id="status" role="status" aria-live="polite" hidden></p>
 
-      <details class="docs" id="docs">
-        <summary>Мои документы</summary>
-        <div class="docs-body" id="docs-body"></div>
-      </details>
+      <section id="start-screen" class="start-screen">
+        <div class="start-intro">
+          <p class="eyebrow">Начните с выбора документа</p>
+          <h2>Какой документ заполняем?</h2>
+          <p>Выберите шаблон — заполнение можно будет продолжить позже.</p>
+        </div>
+        <div id="template-cards" class="template-cards" aria-label="Доступные шаблоны"></div>
 
-      <div class="progress-row">
-        <p id="progress" class="progress" aria-live="polite"></p>
-        <nav id="steps" class="steps" aria-label="Разделы документа"></nav>
-      </div>
+        <details class="docs" id="docs">
+          <summary>Мои документы</summary>
+          <div class="docs-body" id="docs-body"></div>
+        </details>
+      </section>
 
-      <main id="step"></main>
+      <section id="editor-screen" class="editor-screen" hidden>
+        <div class="template-row">
+          <label for="template">Шаблон</label>
+          <select id="template" class="tpl"></select>
+        </div>
 
-      <p id="status" role="status" aria-live="polite"></p>
+        <div class="progress-row">
+          <p id="progress" class="progress" aria-live="polite"></p>
+          <nav id="steps" class="steps" aria-label="Разделы документа"></nav>
+        </div>
 
-      <div class="actions-secondary">
-        <button id="save" type="button" class="btn btn-ghost">Сохранить документ</button>
-      </div>
+        <main id="step"></main>
 
-      <div id="actions" class="actions">
-        <button id="back" type="button" class="btn btn-ghost">Назад</button>
-        <button id="next" type="button" class="btn btn-primary">Далее</button>
-      </div>
+        <div class="actions-secondary">
+          <button id="save" type="button" class="btn btn-ghost">Сохранить документ</button>
+        </div>
+
+        <div id="actions" class="actions">
+          <button id="back" type="button" class="btn btn-ghost">Назад</button>
+          <button id="next" type="button" class="btn btn-primary">Далее</button>
+        </div>
+      </section>
+
     </div>
 
     <script type="module" src="/src/main.js"></script>

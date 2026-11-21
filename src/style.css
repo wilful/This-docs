@@ -38,6 +38,10 @@
   box-sizing: border-box;
 }
 
+[hidden] {
+  display: none !important;
+}
+
 html,
 body {
   margin: 0;
@@ -206,6 +210,108 @@ header {
 
 .template-row {
   padding: 1rem 1.25rem 0.45rem;
+}
+
+.start-screen {
+  flex: 1;
+  min-width: 0;
+  padding: 1rem 1.25rem 1.5rem;
+}
+
+.start-intro {
+  margin: 0.3rem 0 1rem;
+}
+
+.start-intro .eyebrow {
+  margin: 0 0 0.35rem;
+  color: var(--orange);
+  font: 600 0.7rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.start-intro h2 {
+  margin: 0;
+  color: var(--fg);
+  font-size: 1.35rem;
+  line-height: 1.25;
+}
+
+.start-intro > p:last-child {
+  margin: 0.45rem 0 0;
+  color: var(--gray);
+  font-size: 0.9rem;
+}
+
+.template-cards {
+  display: grid;
+  gap: 0.65rem;
+}
+
+.template-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.8rem;
+  width: 100%;
+  min-height: 76px;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--bg2);
+  border-radius: var(--radius);
+  background: var(--bg1);
+  color: var(--fg);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 0.12s ease, background 0.12s ease, transform 0.12s ease;
+}
+
+.template-card:hover,
+.template-card:focus-visible {
+  border-color: var(--orange);
+  background: #423b38;
+}
+
+.template-card:active {
+  transform: scale(0.99);
+}
+
+.template-card:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
+}
+
+.template-card-copy {
+  display: grid;
+  gap: 0.25rem;
+  min-width: 0;
+}
+
+.template-card-copy strong {
+  font-size: 0.95rem;
+  line-height: 1.35;
+}
+
+.template-card-copy small {
+  color: var(--gray);
+  font-size: 0.75rem;
+}
+
+.template-card-arrow {
+  flex: 0 0 auto;
+  color: var(--orange);
+  font-size: 1.25rem;
+}
+
+.start-screen .docs {
+  margin: 1.2rem 0 0;
+}
+
+.editor-screen {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
 }
 
 .template-row label {

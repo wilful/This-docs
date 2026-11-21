@@ -16,6 +16,9 @@ const els = {
   progress: document.getElementById("progress"),
   brandTitle: document.getElementById("brand-title"),
   brandSubtitle: document.getElementById("brand-subtitle"),
+  startScreen: document.getElementById("start-screen"),
+  editorScreen: document.getElementById("editor-screen"),
+  templateCards: document.getElementById("template-cards"),
   step: document.getElementById("step"),
   status: document.getElementById("status"),
   back: document.getElementById("back"),
@@ -106,6 +109,7 @@ function loadDoc(id) {
   els.tpl.value = tpl.id;
   data = cloneData(doc.data);
   stepIndex = 0;
+  showEditor();
   renderStep();
   setStatus("Документ загружен из сохранённых.");
 }
@@ -158,6 +162,67 @@ function renderSavedDocs() {
   row.className = "saved";
   row.append(sel, loadBtn, delBtn);
   body.appendChild(row);
+}
+
+function renderTemplateCards() {
+  els.templateCards.innerHTML = "";
+  for (const tpl of templates) {
+    const draft = loadDraft(tpl);
+    const card = document.createElement("button");
+    card.type = "button";
+    card.className = "template-card";
+    card.setAttribute("aria-label", `${tpl.schema.name}${draft ? ", продолжить черновик" : ", начать заполнение"}`);
+
+    const copy = document.createElement("span");
+    copy.className = "template-card-copy";
+    const name = document.createElement("strong");
+    name.textContent = tpl.schema.name;
+    const hint = document.createElement("small");
+    hint.textContent = draft ? "Продолжить заполнение" : "Начать заполнение";
+    copy.append(name, hint);
+
+    const arrow = document.createElement("span");
+    arrow.className = "template-card-arrow";
+    arrow.setAttribute("aria-hidden", "true");
+    arrow.textContent = "→";
+    card.append(copy, arrow);
+    card.addEventListener("click", () => openTemplate(tpl));
+    els.templateCards.appendChild(card);
+  }
+}
+
+function showEditor() {
+  els.startScreen.hidden = true;
+  els.editorScreen.hidden = false;
+  els.home.hidden = false;
+}
+
+function showStartScreen() {
+  els.editorScreen.hidden = true;
+  els.startScreen.hidden = false;
+  els.home.hidden = true;
+  els.brandTitle.textContent = "Выберите шаблон";
+  els.brandSubtitle.textContent = "Готовые документы для заполнения";
+  els.toolsMenu.open = false;
+  els.status.hidden = !els.status.textContent;
+  renderTemplateCards();
+}
+
+function openTemplate(tpl) {
+  if (!els.editorScreen.hidden) {
+    writeStep(getGroups(current)[stepIndex]);
+    saveDraft();
+  }
+  current = tpl;
+  els.tpl.value = tpl.id;
+  const draft = loadDraft(tpl);
+  data = draft ? cloneData(draft.data) : emptyData(tpl);
+  stepIndex = draft ? Math.min(draft.stepIndex || 0, getGroups(tpl).length - 1) : 0;
+  showEditor();
+  els.status.hidden = false;
+  setStatus("");
+  renderStep();
+  setStatus(draft ? "Черновик восстановлен." : "Заполните поля документа.");
 }
 
 function showSourceDump(source) {
@@ -620,26 +685,20 @@ els.back.addEventListener("click", () => {
 });
 
 els.home.addEventListener("click", () => {
-  selectTemplateStart();
+  writeStep(getGroups(current)[stepIndex]);
+  saveDraft();
+  setStatus("");
+  showStartScreen();
 });
-
-function selectTemplateStart() {
-  stepIndex = 0;
-  els.tpl.focus();
-  els.tpl.scrollIntoView({ behavior: "smooth", block: "start" });
-  setStatus("Выберите шаблон документа.");
-}
 
 els.restart.addEventListener("click", () => {
   els.toolsMenu.open = false;
   if (!window.confirm("Очистить черновики и начать заново? Сохранённые документы останутся.")) return;
   for (const tpl of templates) localStorage.removeItem(draftKey(tpl.id));
-  current = templates[0];
   data = emptyData(current);
   stepIndex = 0;
-  els.tpl.value = current.id;
-  renderStep();
-  selectTemplateStart();
+  showStartScreen();
+  setStatus("Черновики очищены. Выберите шаблон, чтобы начать заново.");
 });
 
 els.clearData.addEventListener("click", () => {
@@ -653,10 +712,8 @@ els.clearData.addEventListener("click", () => {
   current = templates[0];
   data = emptyData(current);
   stepIndex = 0;
-  els.tpl.value = current.id;
-  renderStep();
   renderSavedDocs();
-  selectTemplateStart();
+  showStartScreen();
   setStatus("Все сохранённые данные удалены. Шаблоны доступны.");
 });
 
@@ -904,6 +961,7 @@ async function exportPdf() {
 
 function setStatus(msg, isError = false) {
   els.status.textContent = msg || "";
+  els.status.hidden = !msg;
   els.status.classList.toggle("error", !!isError);
 }
 
@@ -918,28 +976,13 @@ function initPicker() {
   }
   els.tpl.value = current.id;
   els.tpl.addEventListener("change", () => {
-    saveDraft();
     const tpl = templates.find((t) => t.id === els.tpl.value) || templates[0];
-    const d = loadDraft(tpl);
-    current = tpl;
-    if (d) {
-      data = d.data;
-      stepIndex = d.stepIndex || 0;
-    } else {
-      data = emptyData(tpl);
-      stepIndex = 0;
-    }
-    renderStep();
+    openTemplate(tpl);
   });
   renderSavedDocs();
+  renderTemplateCards();
 }
 
 initPicker();
-const startDraft = loadDraft(current);
-if (startDraft) {
-  data = startDraft.data;
-  stepIndex = startDraft.stepIndex || 0;
-} else {
-  data = emptyData(current);
-}
-renderStep();
+data = emptyData(current);
+showStartScreen();
