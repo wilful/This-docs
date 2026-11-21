@@ -68,6 +68,10 @@ body {
 /* ---------------- header ---------------- */
 
 header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
   padding: 1.25rem 1.25rem 1rem;
   border-bottom: 1px solid var(--bg2);
 }
@@ -78,6 +82,27 @@ header h1 {
   letter-spacing: -0.01em;
   margin: 0;
   color: var(--fg);
+}
+
+.home-btn {
+  flex: 0 0 auto;
+  border: 1px solid var(--bg3);
+  border-radius: var(--radius-sm);
+  padding: 0.45rem 0.65rem;
+  background: var(--bg1);
+  color: var(--fg2);
+  font: 600 0.78rem ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  cursor: pointer;
+}
+
+.home-btn:hover {
+  border-color: var(--orange);
+  color: var(--orange);
+}
+
+.home-btn:focus-visible {
+  outline: 2px solid var(--yellow);
+  outline-offset: 2px;
 }
 
 /* ---------------- template selector ---------------- */
@@ -118,10 +143,10 @@ select.tpl:focus-visible {
 .steps {
   display: flex;
   flex-wrap: nowrap;
-  gap: 0;
+  gap: 0.35rem;
   padding: 0.8rem 1.25rem;
   overflow-x: auto;
-  overflow-y: visible;
+  overflow-y: hidden;
   scrollbar-width: none;
   /* min-width:0 is required: as a flex child of the column .wrap it would
      otherwise refuse to shrink below its content and overflow the layout. */
@@ -137,67 +162,61 @@ select.tpl:focus-visible {
 
 .step-chip {
   position: relative;
-  flex: 0 1 auto;
-  min-width: 0;
+  flex: 0 0 auto;
+  max-width: min(16rem, 78vw);
   display: flex;
   align-items: center;
-  gap: 0.4rem;
+  justify-content: center;
+  gap: 0;
   white-space: normal;
-  overflow-wrap: anywhere;
-  text-align: left;
-  border: 1px solid var(--bg3);
-  background: var(--bg1);
+  overflow-wrap: break-word;
+  text-align: center;
+  isolation: isolate;
+  border: 0;
+  background: transparent;
   color: var(--gray);
-  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, 100% 50%, calc(100% - 0.65rem) 100%, 0 100%, 0.65rem 50%);
-  padding: 0.45rem 1rem 0.45rem 1.2rem;
+  padding: 0.5rem 1.15rem;
   font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
   font-size: 0.78rem;
   font-weight: 600;
   cursor: pointer;
 }
 
-.step-chip:first-child {
-  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, 100% 50%, calc(100% - 0.65rem) 100%, 0 100%);
-  padding-left: 0.8rem;
+.step-chip::before,
+.step-chip::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  clip-path: polygon(0 0, calc(100% - 0.65rem) 0, 100% 50%, calc(100% - 0.65rem) 100%, 0 100%, 0.65rem 50%);
 }
 
-.step-chip + .step-chip {
-  margin-left: -0.65rem;
+.step-chip::before {
+  background: var(--bg3);
 }
 
-.step-chip:last-child {
-  clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%, 0.65rem 50%);
-}
-
-.step-chip:only-child {
-  clip-path: none;
-}
-
-.step-chip .num {
-  color: var(--fg);
-}
-
-.step-chip .num::after {
-  content: ".";
+.step-chip::after {
+  inset: 1.5px;
+  background: var(--bg0-hard);
+  clip-path: polygon(0 0, calc(100% - 0.62rem) 0, 100% 50%, calc(100% - 0.62rem) 100%, 0 100%, 0.62rem 50%);
 }
 
 .step-chip[aria-current="step"] {
-  background: var(--orange);
   color: var(--bg0);
-  border-color: var(--orange);
 }
 
-.step-chip[aria-current="step"] .num {
-  color: var(--bg0);
+.step-chip[aria-current="step"]::before,
+.step-chip[aria-current="step"]::after {
+  background: var(--orange);
 }
 
 .step-chip.done {
   color: var(--aqua);
-  border-color: var(--aqua);
 }
 
-.step-chip.done .num {
-  color: var(--aqua);
+.step-chip.done::before {
+  background: var(--aqua);
 }
 
 /* ---------------- main screen ---------------- */
@@ -489,36 +508,18 @@ textarea:focus {
 
   .steps {
     padding-inline: 1rem;
-    gap: 0;
-    overflow-x: hidden;
+    gap: 0.2rem;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    overscroll-behavior-x: contain;
   }
 
   .step-chip {
-    flex: 1 1 0;
-    justify-content: center;
-    gap: 0.2rem;
-    padding: 0.45rem 0.8rem 0.45rem 1rem;
-    font-size: 0.68rem;
-  }
-
-  .step-chip:first-child {
-    padding-left: 0.55rem;
-  }
-
-  .step-chip + .step-chip {
-    margin-left: -0.55rem;
-  }
-
-  .step-chip .title {
-    display: none;
-  }
-
-  .step-chip[aria-current="step"] .title {
-    display: inline;
-  }
-
-  .step-chip[aria-current="step"] {
-    flex-grow: 2.5;
+    flex: 0 0 auto;
+    max-width: 72vw;
+    scroll-snap-align: center;
+    padding-inline: 1rem;
+    font-size: 0.72rem;
   }
 
   main#step {

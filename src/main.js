@@ -18,6 +18,7 @@ const els = {
   back: document.getElementById("back"),
   next: document.getElementById("next"),
   save: document.getElementById("save"),
+  home: document.getElementById("home"),
 };
 
 // ---- saved documents (localStorage) ----
@@ -552,19 +553,24 @@ function renderSteps(groups) {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "step-chip";
-    const num = document.createElement("span");
-    num.className = "num";
-    num.textContent = String(i + 1);
     const title = document.createElement("span");
     title.className = "title";
     title.textContent = g.title;
-    chip.append(num, title);
-    chip.setAttribute("aria-label", `Раздел ${i + 1}: ${g.title}`);
+    chip.append(title);
+    chip.setAttribute("aria-label", `Раздел: ${g.title}`);
     if (i === stepIndex) chip.setAttribute("aria-current", "step");
     else if (i < stepIndex) chip.classList.add("done");
     chip.addEventListener("click", () => gotoStep(i));
     els.steps.appendChild(chip);
   });
+  const active = els.steps.querySelector('[aria-current="step"]');
+  if (active) {
+    const left = active.offsetLeft;
+    const right = left + active.offsetWidth;
+    if (left < els.steps.scrollLeft) els.steps.scrollLeft = left;
+    else if (right > els.steps.scrollLeft + els.steps.clientWidth)
+      els.steps.scrollLeft = right - els.steps.clientWidth;
+  }
 }
 
 function renderActions(groups) {
@@ -600,6 +606,21 @@ els.back.addEventListener("click", () => {
   writeStep(getGroups(current)[stepIndex]);
   stepIndex--;
   renderStep();
+});
+
+els.home.addEventListener("click", () => {
+  const hasProgress = stepIndex > 0 || getGroups(current).some((g) => {
+    const value = data[g.id];
+    return g.repeatable
+      ? value.length > 0
+      : Object.values(value || {}).some((v) => String(v ?? "").trim() !== "");
+  });
+  if (hasProgress && !window.confirm("Вернуться к выбору шаблона? Черновик текущего документа останется сохранён.")) return;
+  saveDraft();
+  stepIndex = 0;
+  els.tpl.focus();
+  els.tpl.scrollIntoView({ behavior: "smooth", block: "start" });
+  setStatus("Выберите шаблон документа.");
 });
 
 els.save.addEventListener("click", () => {
