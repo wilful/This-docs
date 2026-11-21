@@ -1,3 +1,15 @@
+// Self-hosted Cyrillic-first family: serif for the document's voice,
+// sans for what the user types, mono for the tool (labels, steps, status).
+import "@fontsource/pt-serif/cyrillic-400.css";
+import "@fontsource/pt-serif/cyrillic-700.css";
+import "@fontsource/pt-serif/latin-400.css";
+import "@fontsource/pt-serif/latin-700.css";
+import "@fontsource/pt-sans/cyrillic-400.css";
+import "@fontsource/pt-sans/cyrillic-700.css";
+import "@fontsource/pt-sans/latin-400.css";
+import "@fontsource/pt-sans/latin-700.css";
+import "@fontsource/pt-mono/cyrillic-400.css";
+import "@fontsource/pt-mono/latin-400.css";
 import "./style.css";
 import { $typst } from "@myriaddreamin/typst.ts/contrib/all-in-one-lite";
 import compilerWasmUrl from "@myriaddreamin/typst-ts-web-compiler/pkg/typst_ts_web_compiler_bg.wasm?url";
@@ -19,6 +31,7 @@ const els = {
   startScreen: document.getElementById("start-screen"),
   editorScreen: document.getElementById("editor-screen"),
   templateCards: document.getElementById("template-cards"),
+  tplMeta: document.getElementById("tpl-meta"),
   step: document.getElementById("step"),
   status: document.getElementById("status"),
   back: document.getElementById("back"),
@@ -164,6 +177,48 @@ function renderSavedDocs() {
   body.appendChild(row);
 }
 
+// Russian plural forms: plural(2, ["раздел", "раздела", "разделов"]) -> "раздела".
+function plural(n, forms) {
+  const mod10 = n % 10;
+  const mod100 = n % 100;
+  if (mod10 === 1 && mod100 !== 11) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4 && (mod100 < 10 || mod100 >= 20)) return forms[1];
+  return forms[2];
+}
+
+// Count sections and fields in a schema (grouped or legacy flat).
+function schemaSize(tpl) {
+  const groups = getGroups(tpl);
+  return {
+    sections: groups.length,
+    fields: groups.reduce((n, g) => n + g.fields.length, 0),
+  };
+}
+
+function templateFacts(tpl) {
+  const { sections, fields } = schemaSize(tpl);
+  return [
+    `${sections} ${plural(sections, ["раздел", "раздела", "разделов"])}`,
+    `${fields} ${plural(fields, ["поле", "поля", "полей"])}`,
+  ].join(", ");
+}
+
+function catalogMeta() {
+  const totals = templates.reduce(
+    (acc, tpl) => {
+      const { sections, fields } = schemaSize(tpl);
+      return { sections: acc.sections + sections, fields: acc.fields + fields };
+    },
+    { sections: 0, fields: 0 }
+  );
+  const n = templates.length;
+  return (
+    `${n} ${plural(n, ["шаблон", "шаблона", "шаблонов"])}, ` +
+    `${totals.sections} ${plural(totals.sections, ["раздел", "раздела", "разделов"])}, ` +
+    `${totals.fields} ${plural(totals.fields, ["поле", "поля", "полей"])}. Данные остаются в браузере.`
+  );
+}
+
 function renderTemplateCards() {
   els.templateCards.innerHTML = "";
   for (const tpl of templates) {
@@ -171,21 +226,37 @@ function renderTemplateCards() {
     const card = document.createElement("button");
     card.type = "button";
     card.className = "template-card";
-    card.setAttribute("aria-label", `${tpl.schema.name}${draft ? ", продолжить черновик" : ", начать заполнение"}`);
+    card.setAttribute(
+      "aria-label",
+      `${tpl.schema.name}${draft ? ", продолжить черновик" : ", начать заполнение"}`
+    );
 
     const copy = document.createElement("span");
     copy.className = "template-card-copy";
     const name = document.createElement("strong");
     name.textContent = tpl.schema.name;
     const hint = document.createElement("small");
-    hint.textContent = draft ? "Продолжить заполнение" : "Начать заполнение";
-    copy.append(name, hint);
+    hint.textContent = tpl.schema.description || "Пошаговое заполнение и готовый PDF.";
+    const meta = document.createElement("span");
+    meta.className = "template-card-meta";
+    meta.textContent = templateFacts(tpl);
+    copy.append(name, hint, meta);
 
+    const side = document.createElement("span");
+    side.className = "template-card-side";
+    if (draft) {
+      const cta = document.createElement("span");
+      cta.className = "template-card-cta draft";
+      cta.textContent = "черновик";
+      side.appendChild(cta);
+    }
     const arrow = document.createElement("span");
     arrow.className = "template-card-arrow";
     arrow.setAttribute("aria-hidden", "true");
     arrow.textContent = "→";
-    card.append(copy, arrow);
+    side.appendChild(arrow);
+
+    card.append(copy, side);
     card.addEventListener("click", () => openTemplate(tpl));
     els.templateCards.appendChild(card);
   }
@@ -201,8 +272,9 @@ function showStartScreen() {
   els.editorScreen.hidden = true;
   els.startScreen.hidden = false;
   els.home.hidden = true;
-  els.brandTitle.textContent = "Выберите шаблон";
-  els.brandSubtitle.textContent = "Готовые документы для заполнения";
+  els.brandTitle.textContent = "Конструктор документов";
+  els.brandSubtitle.textContent = "Договоры и заявления — заполнить и скачать PDF";
+  if (els.tplMeta) els.tplMeta.textContent = catalogMeta();
   els.toolsMenu.open = false;
   els.status.hidden = !els.status.textContent;
   renderTemplateCards();
@@ -629,10 +701,14 @@ function renderSteps(groups) {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "step-chip";
+    const no = document.createElement("span");
+    no.className = "step-no";
+    no.setAttribute("aria-hidden", "true");
+    no.textContent = String(i + 1).padStart(2, "0");
     const title = document.createElement("span");
     title.className = "title";
     title.textContent = g.title;
-    chip.append(title);
+    chip.append(no, title);
     chip.setAttribute("aria-label", `Раздел: ${g.title}`);
     if (i === stepIndex) chip.setAttribute("aria-current", "step");
     else if (i < stepIndex) chip.classList.add("done");
@@ -968,6 +1044,16 @@ function setStatus(msg, isError = false) {
 // ---- template picker ----
 
 function initPicker() {
+  // Footer template links: same action as the cards, but real anchors so the
+  // document names stay crawlable in the static HTML.
+  for (const link of document.querySelectorAll(".foot-links a[data-tpl]")) {
+    link.addEventListener("click", (e) => {
+      e.preventDefault();
+      const tpl = templates.find((t) => t.id === link.dataset.tpl);
+      if (tpl) openTemplate(tpl);
+    });
+  }
+
   for (const t of templates) {
     const opt = document.createElement("option");
     opt.value = t.id;

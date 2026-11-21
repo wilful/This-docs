@@ -3,47 +3,216 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Конструктор документов — Typst</title>
+
+    <title>Конструктор документов — договоры купли-продажи и заявления с экспортом в PDF</title>
+    <meta
+      name="description"
+      content="Составьте договор купли-продажи квартиры или автомобиля: заполните разделы по шагам и скачайте готовый PDF. Документ собирается в браузере, данные остаются на устройстве."
+    />
+    <meta
+      name="keywords"
+      content="конструктор документов, шаблон договора, договор купли-продажи квартиры, договор купли-продажи автомобиля, заполнить договор, скачать PDF"
+    />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <meta name="author" content="Конструктор документов" />
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#1d2021" />
+    <link rel="canonical" href="https://wilful.github.io/This-docs/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:locale" content="ru_RU" />
+    <meta property="og:site_name" content="Конструктор документов" />
+    <meta property="og:url" content="https://wilful.github.io/This-docs/" />
+    <meta
+      property="og:title"
+      content="Конструктор документов — договоры купли-продажи с экспортом в PDF"
+    />
+    <meta
+      property="og:description"
+      content="Выберите шаблон, заполните разделы по шагам и скачайте готовый PDF. Всё собирается в браузере, без отправки данных на сервер."
+    />
+    <meta property="og:image" content="https://wilful.github.io/This-docs/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Знак конструктора документов: параграф на тёмной плашке" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Конструктор документов — договоры купли-продажи с экспортом в PDF"
+    />
+    <meta
+      name="twitter:description"
+      content="Заполните разделы по шагам и скачайте готовый PDF. Документ собирается в браузере."
+    />
+    <meta name="twitter:image" content="https://wilful.github.io/This-docs/og-image.png" />
+
+    <link rel="icon" href="./favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="./favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" sizes="180x180" />
+    <link rel="manifest" href="./site.webmanifest" />
+    <meta name="apple-mobile-web-app-title" content="Документы" />
+    <meta name="format-detection" content="telephone=no" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "WebApplication",
+            "name": "Конструктор документов",
+            "url": "https://wilful.github.io/This-docs/",
+            "applicationCategory": "BusinessApplication",
+            "operatingSystem": "Любая ОС с современным браузером",
+            "browserRequirements": "Требуется JavaScript и поддержка WebAssembly",
+            "inLanguage": "ru-RU",
+            "description": "Пошаговый конструктор договоров: выберите шаблон, заполните разделы и скачайте готовый PDF. Документ собирается в браузере.",
+            "featureList": [
+              "Пошаговое заполнение разделов документа",
+              "Повторное использование сохранённых сторон договора",
+              "Хранение черновиков и версий документа в браузере",
+              "Экспорт готового документа в PDF"
+            ],
+            "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" }
+          },
+          {
+            "@type": "ItemList",
+            "name": "Шаблоны документов",
+            "itemListElement": [
+              {
+                "@type": "ListItem",
+                "position": 1,
+                "item": {
+                  "@type": "CreativeWork",
+                  "name": "Договор купли-продажи недвижимости",
+                  "inLanguage": "ru-RU"
+                }
+              },
+              {
+                "@type": "ListItem",
+                "position": 2,
+                "item": {
+                  "@type": "CreativeWork",
+                  "name": "Договор купли-продажи автомобиля",
+                  "inLanguage": "ru-RU"
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
   </head>
   <body>
     <div class="wrap">
-      <header>
-        <button id="home" type="button" class="home-btn" aria-label="К выбору шаблона" title="К выбору шаблона" hidden>←</button>
-        <div class="brand" id="brand">
-          <h1 id="brand-title">Выберите шаблон</h1>
-          <p id="brand-subtitle">Готовые документы для заполнения</p>
+      <header class="masthead">
+        <svg class="mark" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+          <rect x="0" y="0" width="48" height="48" rx="13" fill="#1d2021" />
+          <rect x="1.5" y="1.5" width="45" height="45" rx="11.5" fill="none" stroke="#fe8019" stroke-width="3" />
+          <path
+            d="M17 23 V17.5 A7 7 0 0 1 24 10.5 L25.5 10.5 A7 7 0 0 1 32.5 17.5 V37"
+            fill="none"
+            stroke="#fbf1c7"
+            stroke-width="6.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          />
+        </svg>
+
+        <div class="masthead-copy">
+          <h1 id="brand-title">Конструктор документов</h1>
+          <p id="brand-subtitle">Договоры и заявления — заполнить и скачать PDF</p>
         </div>
-        <details class="tools-menu">
-          <summary aria-label="Действия с данными" title="Действия с данными">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg>
-          </summary>
-          <div class="tools-popover">
-            <button id="restart" type="button" class="tool-item">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12a9 9 0 1 0 2.6-6.4L3 8"/><path d="M3 3v5h5"/></svg>
-              <span>Начать заново</span>
-            </button>
-            <button id="clear-data" type="button" class="tool-item destructive">
-              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3"/></svg>
-              <span>Удалить сохранённые данные</span>
-            </button>
-          </div>
-        </details>
+
+        <div class="masthead-actions">
+          <button
+            id="home"
+            type="button"
+            class="icon-btn"
+            aria-label="К выбору шаблона"
+            title="К выбору шаблона"
+            hidden
+          >
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M19 12H5" />
+              <path d="M11 18l-6-6 6-6" />
+            </svg>
+          </button>
+
+          <details class="tools-menu">
+            <summary aria-label="Действия с данными" title="Действия с данными">
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="5" cy="12" r="1.5" />
+                <circle cx="12" cy="12" r="1.5" />
+                <circle cx="19" cy="12" r="1.5" />
+              </svg>
+            </summary>
+            <div class="tools-popover">
+              <button id="restart" type="button" class="tool-item">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M3 12a9 9 0 1 0 2.6-6.4L3 8" />
+                  <path d="M3 3v5h5" />
+                </svg>
+                <span>Начать заново</span>
+              </button>
+              <button id="clear-data" type="button" class="tool-item destructive">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3" />
+                </svg>
+                <span>Удалить сохранённые данные</span>
+              </button>
+            </div>
+          </details>
+        </div>
       </header>
 
       <p id="status" role="status" aria-live="polite" hidden></p>
 
       <section id="start-screen" class="start-screen">
-        <div class="start-intro">
-          <p class="eyebrow">Начните с выбора документа</p>
+        <div class="hero">
           <h2>Какой документ заполняем?</h2>
-          <p>Выберите шаблон — заполнение можно будет продолжить позже.</p>
+          <p class="hero-lede">
+            Выберите шаблон, заполните разделы по шагам и скачайте готовый PDF. Черновик
+            сохранится, даже если закрыть страницу.
+          </p>
+          <p class="hero-meta" id="tpl-meta">Шаблоны договоров купли-продажи</p>
+          <div class="ruler" aria-hidden="true"></div>
         </div>
+
         <div id="template-cards" class="template-cards" aria-label="Доступные шаблоны"></div>
+
+        <section class="how" aria-labelledby="how-title">
+          <h3 id="how-title">Как это работает</h3>
+          <ol>
+            <li>Выберите шаблон: договор купли-продажи недвижимости или автомобиля.</li>
+            <li>
+              Заполните разделы — стороны, объект, условия и дату. Обязательные поля отмечены
+              звёздочкой.
+            </li>
+            <li>Нажмите «Скачать PDF»: документ соберётся в браузере, без отправки на сервер.</li>
+          </ol>
+        </section>
 
         <details class="docs" id="docs">
           <summary>Мои документы</summary>
           <div class="docs-body" id="docs-body"></div>
         </details>
+
+        <footer class="site-foot">
+          <p>
+            Документы формируются прямо в браузере: текст не отправляется на сервер и остаётся на
+            вашем устройстве.
+          </p>
+          <nav class="foot-links" aria-label="Шаблоны документов">
+            <a href="#" data-tpl="sales-contract">Договор купли-продажи недвижимости</a>
+            <a href="#" data-tpl="car-contract">Договор купли-продажи автомобиля</a>
+          </nav>
+          <p class="fine">
+            Набор текста выводится шрифтами PT Serif, PT Sans и PT Mono. PDF собирается Typst,
+            скомпилированным в WebAssembly. Черновики, версии документов и сохранённые стороны
+            хранятся в localStorage браузера.
+          </p>
+        </footer>
       </section>
 
       <section id="editor-screen" class="editor-screen" hidden>
@@ -68,8 +237,15 @@
           <button id="next" type="button" class="btn btn-primary">Далее</button>
         </div>
       </section>
-
     </div>
+
+    <noscript>
+      <p>
+        Конструктор документов собирает договоры купли-продажи недвижимости и автомобиля и
+        выгружает их в PDF. Для заполнения и сборки PDF нужен JavaScript: включите его и
+        обновите страницу.
+      </p>
+    </noscript>
 
     <script type="module" src="/src/main.js"></script>
   </body>
