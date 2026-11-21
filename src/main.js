@@ -282,7 +282,13 @@ function renderSteps(groups) {
     const chip = document.createElement("button");
     chip.type = "button";
     chip.className = "step-chip";
-    chip.textContent = `${i + 1}. ${g.title}`;
+    const num = document.createElement("span");
+    num.className = "num";
+    num.textContent = String(i + 1);
+    const title = document.createElement("span");
+    title.className = "title";
+    title.textContent = g.title;
+    chip.append(num, title);
     if (i === stepIndex) chip.setAttribute("aria-current", "step");
     else if (i < stepIndex) chip.classList.add("done");
     chip.addEventListener("click", () => gotoStep(i));
