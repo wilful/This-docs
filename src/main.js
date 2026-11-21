@@ -69,9 +69,107 @@ function inputAttrs(f) {
         el: "input",
         type: "text",
         inputmode: f.inputmode || "text",
-        autocomplete: f.autocomplete || "off",
+        autocomplete: f.autocomplete || keyAuto(f.key),
       };
   }
+}
+
+// ---- Russian formatting & validation ----
+
+// Today as YYYY-MM-DD (native <input type="date"> value).
+function todayISO() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+// Convert YYYY-MM-DD to Russian DD.MM.YYYY for the document body.
+function ruDateDisplay(v) {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(v).trim());
+  if (!m) return v;
+  return `${m[3]}.${m[2]}.${m[1]}`;
+}
+
+// Map common field keys to HTML autocomplete tokens.
+function keyAuto(key) {
+  if (key === "fio") return "name";
+  if (key === "address") return "street-address";
+  if (key === "phone") return "tel";
+  if (key === "email") return "email";
+  return "off";
+}
+
+// Normalize a Russian phone to "+7 (XXX) XXX-XX-XX".
+function fmtPhone(raw) {
+  const s = String(raw).replace(/\D/g, "");
+  if (s.length === 11 && (s[0] === "8" || s[0] === "7"))
+    return `+7 (${s.slice(1, 4)}) ${s.slice(4, 7)}-${s.slice(7, 9)}-${s.slice(9)}`;
+  if (s.length === 10) return `+7 (${s.slice(0, 3)}) ${s.slice(3, 6)}-${s.slice(6, 8)}-${s.slice(8)}`;
+  return String(raw).trim();
+}
+
+// Russian internal passport: 10 digits -> "XX XX XXXXXX".
+function fmtPassport(raw) {
+  const s = String(raw).replace(/\D/g, "");
+  if (s.length === 10) return `${s.slice(0, 2)} ${s.slice(2, 4)} ${s.slice(4)}`;
+  return String(raw).trim();
+}
+
+// Cadastral number: 13 digits -> "XX:XX:XXXXXXX:XX".
+function fmtCadastral(raw) {
+  const s = String(raw).replace(/\D/g, "");
+  if (s.length === 13) return `${s.slice(0, 2)}:${s.slice(2, 4)}:${s.slice(4, 11)}:${s.slice(11)}`;
+  return String(raw).trim();
+}
+
+// Group thousands with spaces (Russian style).
+function fmtNumber(raw) {
+  const s = String(raw).replace(/[^\d.,]/g, "").replace(",", ".");
+  if (!/^\d+(\.\d+)?$/.test(s)) return String(raw).trim();
+  const [int, dec] = s.split(".");
+  const g = (x) => x.replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return dec ? `${g(int)}.${dec}` : g(int);
+}
+
+// Normalize a field value for Russian conventions.
+function formatValue(f, raw) {
+  const v = String(raw ?? "").trim();
+  if (!v) return v;
+  if (f.key === "phone" || f.type === "tel") return fmtPhone(v);
+  if (f.key === "passport") return fmtPassport(v);
+  if (f.key === "cadastral") return fmtCadastral(v);
+  if (f.type === "number" || f.key === "price" || f.key === "area") return fmtNumber(v);
+  return v;
+}
+
+// Validate a single field's format. Returns an error message or null.
+function validateValue(f, raw) {
+  const v = String(raw ?? "").trim();
+  if (!v) return null;
+  if (f.key === "phone" || f.type === "tel") {
+    const s = v.replace(/\D/g, "");
+    if (s.length === 10) return null;
+    if (s.length === 11 && (s[0] === "8" || s[0] === "7")) return null;
+    return "Телефон в формате +7 (XXX) XXX-XX-XX";
+  }
+  if (f.key === "passport") {
+    if (v.replace(/\D/g, "").length === 10) return null;
+    return "Паспорт: 10 цифр (XX XX XXXXXX)";
+  }
+  if (f.key === "cadastral") {
+    if (/^\d{2}:\d{2}:\d{7}:\d{2}$/.test(v)) return null;
+    return "Кадастр: XX:XX:XXXXXXX:XX";
+  }
+  if (f.type === "email") {
+    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return null;
+    return "Введите корректный e-mail";
+  }
+  if (f.type === "date") {
+    if ((/^\d{4}-\d{2}-\d{2}$/.test(v) && !isNaN(Date.parse(v))) || /^\d{2}\.\d{2}\.\d{4}$/.test(v))
+      return null;
+    return "Дата в формате ДД.ММ.ГГГГ";
+  }
+  return null;
 }
 
 // ---- field element builder ----
@@ -93,6 +191,8 @@ function buildField(f, value) {
   wrap.appendChild(label);
 
   const a = inputAttrs(f);
+  let initial = value ?? "";
+  if (f.type === "date" && !initial) initial = todayISO();
   let control;
   if (a.el === "textarea") {
     control = document.createElement("textarea");
@@ -118,9 +218,33 @@ function buildField(f, value) {
   }
   control.id = id;
   control.dataset.key = f.key;
-  control.value = value ?? "";
+  control.value = initial;
   if (f.placeholder && a.el !== "select") control.placeholder = f.placeholder;
   control.autocomplete = a.autocomplete || "off";
+
+  // Datalist suggestions (autocomplete) for free-text fields with options.
+  if (a.el !== "select" && Array.isArray(f.options) && f.options.length) {
+    const dl = document.createElement("datalist");
+    dl.id = "dl_" + id;
+    for (const opt of f.options) {
+      const o = document.createElement("option");
+      o.value = opt;
+      dl.appendChild(o);
+    }
+    control.setAttribute("list", dl.id);
+    wrap.appendChild(dl);
+  }
+
+  // Auto-format on leave, validate live (Russian conventions).
+  control.addEventListener("blur", () => {
+    const formatted = formatValue(f, control.value);
+    if (formatted !== control.value) control.value = formatted;
+    setFieldError(wrap, validateValue(f, control.value));
+  });
+  control.addEventListener("input", () => {
+    if (wrap.classList.contains("invalid")) setFieldError(wrap, validateValue(f, control.value));
+  });
+
   wrap.appendChild(control);
 
   const err = document.createElement("div");
@@ -356,18 +480,46 @@ function writeStep(g) {
 
 // ---- validation ----
 
-function markInvalid(scope, key) {
+function setFieldError(wrap, msg) {
+  const err = wrap.querySelector(".err");
+  if (msg) {
+    wrap.classList.add("invalid");
+    if (err) err.textContent = msg;
+  } else {
+    wrap.classList.remove("invalid");
+    if (err) err.textContent = "Заполните поле";
+  }
+}
+
+function markInvalid(scope, key, msg) {
   const el = scope.querySelector(`[data-key="${key}"]`);
   if (!el) return;
   const fld = el.closest(".field");
   if (!fld) return;
-  fld.classList.add("invalid");
-  el.addEventListener("input", () => fld.classList.remove("invalid"), { once: true });
+  setFieldError(fld, msg || "Заполните поле");
+  el.addEventListener("input", () => setFieldError(fld, null), { once: true });
 }
 
 function validateStep(g) {
   let ok = true;
   let firstInvalid = null;
+
+  const check = (scope, f) => {
+    const el = scope.querySelector(`[data-key="${f.key}"]`);
+    const v = el ? el.value : "";
+    if (f.required && !v.trim()) {
+      markInvalid(scope, f.key, "Заполните поле");
+      ok = false;
+      if (!firstInvalid) firstInvalid = el;
+      return;
+    }
+    const msg = validateValue(f, v);
+    if (msg) {
+      markInvalid(scope, f.key, msg);
+      ok = false;
+      if (!firstInvalid) firstInvalid = el;
+    }
+  };
 
   if (g.repeatable) {
     const reps = [...els.step.querySelectorAll("[data-rep]")];
@@ -375,33 +527,13 @@ function validateStep(g) {
       setStatus(`Добавьте хотя бы одну сторону в разделе «${g.title}».`, true);
       return false;
     }
-    reps.forEach((rep) => {
-      for (const f of g.fields) {
-        if (f.required) {
-          const el = rep.querySelector(`[data-key="${f.key}"]`);
-          if (!el || !el.value.trim()) {
-            markInvalid(rep, f.key);
-            ok = false;
-            if (!firstInvalid) firstInvalid = el;
-          }
-        }
-      }
-    });
+    reps.forEach((rep) => g.fields.forEach((f) => check(rep, f)));
   } else {
-    for (const f of g.fields) {
-      if (f.required) {
-        const el = els.step.querySelector(`[data-key="${f.key}"]`);
-        if (!el || !el.value.trim()) {
-          markInvalid(els.step, f.key);
-          ok = false;
-          if (!firstInvalid) firstInvalid = el;
-        }
-      }
-    }
+    g.fields.forEach((f) => check(els.step, f));
   }
 
   if (!ok) {
-    setStatus("Заполните обязательные поля (отмечены *).", true);
+    setStatus("Заполните обязательные поля и проверьте формат (отмечены *).", true);
     if (firstInvalid) firstInvalid.focus();
   }
   return ok;
@@ -417,6 +549,8 @@ function validateData(tpl) {
         for (const f of g.fields) {
           if (f.required && !(rep[f.key] || "").trim())
             return `Заполните обязательное поле в «${g.title}».`;
+          const msg = validateValue(f, rep[f.key] || "");
+          if (msg) return `${g.title}: ${msg}.`;
         }
       }
     } else {
@@ -424,6 +558,8 @@ function validateData(tpl) {
       for (const f of g.fields) {
         if (f.required && !(o[f.key] || "").trim())
           return `Заполните обязательное поле «${f.label}».`;
+        const msg = validateValue(f, o[f.key] || "");
+        if (msg) return `${f.label}: ${msg}.`;
       }
     }
   }
@@ -434,24 +570,49 @@ function validateData(tpl) {
 
 function typstStr(v) {
   let s = String(v ?? "");
-  // Drop control characters that JSON would escape as \b \f \uXXXX — Typst
-  // string literals reject those escapes and fail to parse the generated
-  // source. Tab/newline/carriage-return are kept (Typst supports \t \n \r).
+  // Drop control characters that Typst string literals cannot represent.
+  // \t \n \r are kept and re-emitted as Typst-legal escapes below.
   s = s.replace(/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/g, "");
-  return JSON.stringify(s);
+  // Build the string manually so we NEVER emit a JS-style \uXXXX escape,
+  // which Typst's parser rejects (it only knows \" \\ \n \r \t). This makes
+  // the generated source safe for any user input, including random text.
+  let out = '"';
+  for (const ch of s) {
+    const cp = ch.codePointAt(0);
+    if (cp >= 0xd800 && cp <= 0xdfff) continue; // drop lone surrogates
+    if (ch === '"') out += '\\"';
+    else if (ch === "\\") out += "\\\\";
+    else if (ch === "\n") out += "\\n";
+    else if (ch === "\r") out += "\\r";
+    else if (ch === "\t") out += "\\t";
+    else out += ch;
+  }
+  return out + '"';
 }
 
-function typstDict(o) {
-  const parts = Object.entries(o).map(([k, v]) => `${k}: ${typstStr(v)}`);
+function buildFieldTypeMap(tpl) {
+  const m = {};
+  for (const g of getGroups(tpl)) for (const f of g.fields) if (!(f.key in m)) m[f.key] = f;
+  return m;
+}
+
+function typstDict(o, typeMap) {
+  const parts = Object.entries(o).map(([k, v]) => {
+    const f = typeMap?.[k];
+    let val = v;
+    if (f && f.type === "date" && v) val = ruDateDisplay(v);
+    return `${k}: ${typstStr(val)}`;
+  });
   return `( ${parts.join(", ")} )`;
 }
 
 function buildSource(tpl, values) {
+  const fieldTypeMap = buildFieldTypeMap(tpl);
   if (isGrouped(tpl)) {
     const entries = getGroups(tpl).map((g) => {
       let val;
       if (g.repeatable) {
-        const dicts = ((values[g.id]) || []).map((r) => typstDict(r));
+        const dicts = ((values[g.id]) || []).map((r) => typstDict(r, fieldTypeMap));
         // Always emit a tuple so the doc function can iterate it, even with a
         // single party: a lone parenthesised dict parses as a dict, not an
         // array. A trailing comma forces a 1-tuple.
@@ -459,7 +620,7 @@ function buildSource(tpl, values) {
           ? `( ${dicts.join(", ")}${dicts.length === 1 ? "," : ""} )`
           : "( )";
       } else {
-        val = typstDict(values[g.id] || {});
+        val = typstDict(values[g.id] || {}, fieldTypeMap);
       }
       return `  ${g.id}: ${val}`;
     });
@@ -467,7 +628,11 @@ function buildSource(tpl, values) {
   }
   // Legacy flat schema: named parameters.
   const args = tpl.schema.fields
-    .map((f) => `  ${f.key}: ${typstStr(values.fields?.[f.key] ?? "")}`)
+    .map((f) => {
+      let v = values.fields?.[f.key] ?? "";
+      if (f.type === "date" && v) v = ruDateDisplay(v);
+      return `  ${f.key}: ${typstStr(v)}`;
+    })
     .join(",\n");
   return `${tpl.typ}\n\n#doc(\n${args}\n)\n`;
 }
