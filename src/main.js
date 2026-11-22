@@ -40,10 +40,19 @@ const els = {
   home: document.getElementById("home"),
   restart: document.getElementById("restart"),
   clearData: document.getElementById("clear-data"),
+  exportData: document.getElementById("export-data"),
+  importData: document.getElementById("import-data"),
+  importFile: document.getElementById("import-file"),
   toolsMenu: document.querySelector(".tools-menu"),
 };
 
 // ---- saved documents (localStorage) ----
+
+// Everything the app persists lives under this prefix, so a full backup is a
+// snapshot of that slice of localStorage (saved documents, drafts, parties).
+const STORAGE_PREFIX = "docbuilder:";
+const BACKUP_APP = "typst-docs";
+const BACKUP_VERSION = 1;
 
 const DOCS_KEY = "docbuilder:docs";
 const draftKey = (id) => `docbuilder:draft:${id}`;
@@ -1021,6 +1030,158 @@ els.clearData.addEventListener("click", () => {
 els.save.addEventListener("click", () => {
   addDoc(current, data);
   setStatus("Документ сохранён в «Мои документы» (все версии).");
+});
+
+// ---- backup: export / import all locally stored data ----
+
+// Read back a stored value without assuming it is JSON.
+function parseStored(raw) {
+  try {
+    return JSON.parse(raw);
+  } catch {
+    return raw;
+  }
+}
+
+// Snapshot of every key the app owns, as plain parsed values.
+function collectStorage() {
+  const entries = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (!key || !key.startsWith(STORAGE_PREFIX)) continue;
+    entries[key] = parseStored(localStorage.getItem(key));
+  }
+  return entries;
+}
+
+function storageTotals() {
+  let docs = 0;
+  let parties = 0;
+  let drafts = 0;
+  for (const [key, value] of Object.entries(collectStorage())) {
+    if (key === DOCS_KEY) docs = Array.isArray(value) ? value.length : 0;
+    else if (key.startsWith(PARTY_PREFIX)) parties += Array.isArray(value) ? value.length : 0;
+    else drafts++;
+  }
+  return { docs, parties, drafts };
+}
+
+function backupFilename() {
+  const d = new Date();
+  const p = (n) => String(n).padStart(2, "0");
+  return `docbuilder-backup-${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}.json`;
+}
+
+// Download a single JSON file holding all saved documents, drafts and parties.
+function exportAllData() {
+  els.toolsMenu.open = false;
+  const entries = collectStorage();
+  if (!Object.keys(entries).length) {
+    setStatus("Пока нечего выгружать — нет сохранённых документов, сторон или черновиков.", true);
+    return;
+  }
+  const payload = {
+    app: BACKUP_APP,
+    version: BACKUP_VERSION,
+    exportedAt: new Date().toISOString(),
+    entries,
+  };
+  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = backupFilename();
+  a.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  setStatus("Файл с сохранёнными данными скачан. Его можно загрузить на другом устройстве.");
+}
+
+// Accept both our own wrapper and a bare { "docbuilder:...": ... } object.
+function readBackup(payload) {
+  if (!payload || typeof payload !== "object") return null;
+  const raw = payload.entries && typeof payload.entries === "object" ? payload.entries : payload;
+  const entries = {};
+  for (const [key, value] of Object.entries(raw)) {
+    if (key.startsWith(STORAGE_PREFIX)) entries[key] = value;
+  }
+  return entries;
+}
+
+// Merge saved documents by id so importing never duplicates versions.
+function mergeDocs(incoming) {
+  const byId = new Map();
+  for (const d of loadDocs()) if (d && d.id) byId.set(d.id, d);
+  for (const d of incoming) if (d && d.id && !byId.has(d.id)) byId.set(d.id, d);
+  return [...byId.values()];
+}
+
+// Merge saved parties, skipping exact duplicates.
+function mergeList(current, incoming) {
+  const seen = new Set(current.map((p) => JSON.stringify(p)));
+  const out = [...current];
+  for (const p of incoming) {
+    const k = JSON.stringify(p);
+    if (seen.has(k)) continue;
+    seen.add(k);
+    out.push(p);
+  }
+  return out;
+}
+
+function applyBackup(entries) {
+  for (const [key, value] of Object.entries(entries)) {
+    if (key === DOCS_KEY) {
+      if (Array.isArray(value)) saveDocs(mergeDocs(value));
+    } else if (key.startsWith(PARTY_PREFIX)) {
+      if (!Array.isArray(value)) continue;
+      const current = loadParties(key.slice(PARTY_PREFIX.length));
+      localStorage.setItem(key, JSON.stringify(mergeList(current, value)));
+    } else {
+      localStorage.setItem(key, JSON.stringify(value));
+    }
+  }
+}
+
+async function importAllData(file) {
+  let payload;
+  try {
+    payload = JSON.parse(await file.text());
+  } catch {
+    setStatus("Не удалось прочитать файл: это не корректный JSON.", true);
+    return;
+  }
+  const entries = readBackup(payload);
+  const keys = entries ? Object.keys(entries) : [];
+  if (!keys.length) {
+    setStatus("В файле нет данных конструктора — возможно, выбран не тот файл.", true);
+    return;
+  }
+  if (
+    !window.confirm(
+      "Добавить данные из файла к текущим? Сохранённые документы и стороны объединятся, черновики обновятся."
+    )
+  )
+    return;
+  applyBackup(entries);
+  renderSavedDocs();
+  renderTemplateCards();
+  const totals = storageTotals();
+  setStatus(
+    `Данные загружены. Документов: ${totals.docs}, сохранённых сторон: ${totals.parties}, черновиков: ${totals.drafts}.`
+  );
+}
+
+els.exportData.addEventListener("click", exportAllData);
+
+els.importData.addEventListener("click", () => {
+  els.toolsMenu.open = false;
+  els.importFile.click();
+});
+
+els.importFile.addEventListener("change", () => {
+  const file = els.importFile.files && els.importFile.files[0];
+  els.importFile.value = "";
+  if (file) importAllData(file);
 });
 
 // ---- read / write current step to state ----
