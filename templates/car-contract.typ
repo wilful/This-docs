@@ -1,7 +1,7 @@
 // Официальный образец ДКП транспортного средства; рекламный блок и QR-код исключены.
-#set page(paper: "a4", margin: (x: 1.75cm, y: 1.25cm), numbering: "1")
-#set text(font: "New Computer Modern", size: 9pt, lang: "ru", fill: rgb("000000"))
-#set par(justify: true, leading: 0.36em, spacing: 0.16em)
+#set page(paper: "a4", margin: (x: 1.5cm, y: 0.9cm), numbering: "1")
+#set text(font: "New Computer Modern", size: 8.5pt, lang: "ru", fill: rgb("000000"))
+#set par(justify: true, leading: 0.28em, spacing: 0.08em)
 
 #let val(v) = if v == "" or v == none { line(length: 10em, stroke: 0.45pt) } else { str(v) }
 #let signature(p) = {
@@ -9,7 +9,7 @@
   if value == "" {
     line(length: 4cm, stroke: 0.5pt)
   } else {
-    image(bytes(value), format: "svg", width: 4cm, height: 1cm, fit: "contain")
+    image(bytes(value), format: "svg", width: 3.5cm, height: 0.7cm, fit: "contain")
   }
 }
 #let section(title) = align(center)[#strong[#title]]
@@ -21,16 +21,16 @@
   let vehicle = data.vehicle
 
   align(center)[ДОГОВОР КУПЛИ-ПРОДАЖИ ТРАНСПОРТНОГО СРЕДСТВА]
-  v(0.45em)
+  v(0.25em)
   grid(columns: (1fr, 1fr), gutter: 1em)[г. #val(terms.at("place", default: ""))][#align(right)[#val(terms.at("date", default: "")) г.]]
-  v(0.5em)
+  v(0.25em)
   [#val(seller.at("fio", default: "")), далее именуемый "Продавец", с одной стороны, и #val(buyer.at("fio", default: "")), далее именуемый "Покупатель", с другой стороны, совместно в дальнейшем именуемые "Стороны", заключили настоящий договор (далее - Договор) о нижеследующем:]
 
-  v(0.35em)
+  v(0.2em)
   section("1. Предмет Договора. Общие положения")
-  v(0.3em)
+  v(0.18em)
   [1.1. Продавец обязуется передать в собственность Покупателя, а Покупатель обязуется принять и оплатить ранее бывшее в эксплуатации следующее транспортное средство (далее — транспортное средство):]
-  v(0.25em)
+  v(0.15em)
   pad(left: 1.2cm)[
     #text("-") государственный регистрационный знак: #val(vehicle.at("plate", default: "")); #linebreak()
     #text("-") идентификационный номер (VIN): #val(vehicle.at("vin", default: "")); #linebreak()
@@ -48,14 +48,11 @@
     #text("-") технически допустимая масса, кг: #val(vehicle.at("max_mass", default: "")); #linebreak()
     #text("-") иные индивидуализирующие признаки (голограммы, рисунки и т.д.): #val(vehicle.at("individual_features", default: "")); #linebreak()
   ]
-  parbreak()
-  v(0.12em)
+  v(0.06em)
   [#linebreak() Паспорт транспортного средства¹ (далее - ПТС) #val(vehicle.at("pts", default: "")), выдан #val(vehicle.at("pts_issued", default: "")).]
-  parbreak()
-  v(0.12em)
+  v(0.06em)
   [#linebreak() 1.2. Принадлежность Продавцу транспортного средства на момент подписания Договора подтверждается ПТС, а также свидетельством о регистрации транспортного средства (техническим паспортом) серии #val(vehicle.at("sts", default: "")), выдано (кем и когда) #val(vehicle.at("sts_issued", default: "")).]
-  parbreak()
-  v(0.12em)
+  v(0.06em)
   [#linebreak() 1.3. Покупатель заключает Договор, основываясь на достоверности, полноте и актуальности следующих представленных Продавцом сведений:]
   parbreak()
   [#linebreak() #text("-") Продавец является собственником транспортного средства.]
@@ -64,27 +61,27 @@
   parbreak()
   [#linebreak() #text("-") если транспортное средство было приобретено Продавцом в браке, Продавец гарантирует, что его супруг (а) не возражает против отчуждения имущества на условиях Договора.]
   parbreak()
-  v(0.1em)
+  v(0.05em)
   [В случае нарушения гарантий, указанных в п.1.3 настоящего Договора, Продавец обязуется незамедлительно возвратить Покупателю стоимость транспортного средства в полном объеме со дня обнаружения соответствующего нарушения.]
 
-  v(0.25em)
+  v(0.12em)
   section("2. Цена, срок и порядок оплаты")
-  v(0.2em)
+  v(0.08em)
   [2.1. Цена транспортного средства составляет #val(terms.at("price", default: "")) (#val(terms.at("price_words", default: ""))) руб. (НДС не облагается). Оплата стоимости транспортного средства производится наличным или безналичным расчётом.]
-  v(0.2em)
+  v(0.08em)
   [2.2. Передача транспортного средства осуществляется Продавцом в момент передачи Покупателем Продавцу денежных средств в счёт оплаты стоимости транспортного средства.]
 
-  v(0.25em)
+  v(0.12em)
   section("3. Заключительные положения")
-  v(0.2em)
+  v(0.08em)
   [Настоящий Договор вступает в силу после его подписания Сторонами и действует до момента полного исполнения Сторонами своих обязательств.]
 
-  v(0.25em)
-  section("4. Адреса и реквизиты Сторон")
   v(0.12em)
+  section("4. Адреса и реквизиты Сторон")
+  v(0.06em)
   table(
     columns: (1fr, 1fr),
-    inset: 5pt,
+    inset: 3pt,
     stroke: none,
     [Продавец #val(seller.at("fio", default: ""))], [Покупатель #val(buyer.at("fio", default: ""))],
     [Дата рождения #val(seller.at("birthdate", default: ""))], [Дата рождения #val(buyer.at("birthdate", default: ""))],
@@ -95,7 +92,7 @@
     [Денежные средства в сумме #val(terms.at("price", default: "")) руб. получил], [Транспортное средство получил],
     [(подпись) #linebreak() /#signature(seller)/ #linebreak() (ФИО)], [(подпись) #linebreak() /#signature(buyer)/ #linebreak() (ФИО)],
   )
-  v(0.15em)
-  v(0.1em)
+  v(0.06em)
+  v(0.04em)
   align(left, text(size: 8pt)[¹ С 1 ноября 2020 года введён электронный ПТС.])
 }
