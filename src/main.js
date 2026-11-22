@@ -488,7 +488,7 @@ function buildField(f, value) {
 
   const a = inputAttrs(f);
   let initial = value ?? "";
-  if (f.type === "date" && !initial) initial = todayISO();
+  if (f.type === "date" && !initial && f.defaultToday) initial = todayISO();
   let control;
   if (a.el === "textarea") {
     control = document.createElement("textarea");

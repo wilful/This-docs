@@ -63,7 +63,7 @@
       "title": "Место, дата и цена договора",
       "fields": [
         { "key": "place", "label": "Город заключения договора", "type": "text", "placeholder": "город" },
-        { "key": "date", "label": "Дата заключения договора", "type": "date", "required": true },
+        { "key": "date", "label": "Дата заключения договора", "type": "date", "required": true, "defaultToday": true },
         { "key": "price", "label": "Цена транспортного средства, руб.", "type": "number", "required": true, "placeholder": "0" },
         { "key": "price_words", "label": "Цена прописью", "type": "text", "placeholder": "один миллион рублей 00 копеек" }
       ]
