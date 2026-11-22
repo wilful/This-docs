@@ -24,7 +24,7 @@ const PARTY_PREFIX = "docbuilder:parties:";
 
 // Version of the app, shown quietly in the footer. Bump it together with
 // `version` in package.json on every commit (see AGENTS.md → Versioning).
-const APP_VERSION = "0.2.1";
+const APP_VERSION = "0.2.2";
 
 const els = {
   tpl: document.getElementById("template"),

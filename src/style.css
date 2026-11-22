@@ -1,5 +1,12 @@
+@charset "UTF-8";
+
 /* ============================================================
    Gruvbox theme for the Typst document constructor.
+
+   The @charset rule above must stay the first line: it pins the
+   stylesheet encoding, and for CSS it wins over a wrong charset in the
+   response headers (which would otherwise garble the Cyrillic strings in
+   ::before/::after).
 
    The app is a typesetting bench for legal paper: a 760px "sheet"
    standing on the bg0-hard ground, cream type on charcoal, and the
