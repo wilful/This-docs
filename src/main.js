@@ -22,6 +22,10 @@ $typst.setRendererInitOptions({ getModule: () => rendererWasmUrl });
 
 const PARTY_PREFIX = "docbuilder:parties:";
 
+// Version of the app, shown quietly in the footer. Bump it together with
+// `version` in package.json on every commit (see AGENTS.md → Versioning).
+const APP_VERSION = "0.2.0";
+
 const els = {
   tpl: document.getElementById("template"),
   steps: document.getElementById("steps"),
@@ -43,6 +47,7 @@ const els = {
   exportData: document.getElementById("export-data"),
   importData: document.getElementById("import-data"),
   importFile: document.getElementById("import-file"),
+  appVersion: document.getElementById("app-version"),
   toolsMenu: document.querySelector(".tools-menu"),
 };
 
@@ -1083,6 +1088,7 @@ function exportAllData() {
   const payload = {
     app: BACKUP_APP,
     version: BACKUP_VERSION,
+    appVersion: APP_VERSION,
     exportedAt: new Date().toISOString(),
     entries,
   };
@@ -1460,6 +1466,8 @@ function initPicker() {
   renderSavedDocs();
   renderTemplateCards();
 }
+
+if (els.appVersion) els.appVersion.textContent = APP_VERSION;
 
 initPicker();
 data = emptyData(current);
