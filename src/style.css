@@ -463,26 +463,28 @@ h3 {
   flex: 1;
 }
 
-/* ---------------- footer ---------------- */
+/* ---------------- footer — выходные данные ---------------- */
 
 .site-foot {
-  margin: 2rem 0 0;
-  padding-top: 1rem;
+  margin: 2.25rem 0 0;
+  padding-top: 1.1rem;
   border-top: 1px solid var(--bg2);
   color: var(--muted);
   font-size: 0.82rem;
 }
 
-.site-foot p {
+.foot-note {
   margin: 0;
-  max-width: 62ch;
+  max-width: 56ch;
+  line-height: 1.55;
 }
 
 .foot-links {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.4rem 1.1rem;
-  margin: 0.7rem 0;
+  gap: 0.35rem 1.15rem;
+  margin: 0.9rem 0 0;
+  font-size: 0.84rem;
 }
 
 .foot-links a {
@@ -497,43 +499,55 @@ h3 {
 }
 
 .fine {
-  color: var(--bg4);
-  font-size: 0.72rem;
-  line-height: 1.55;
+  margin: 1rem 0 0;
+  max-width: 62ch;
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.6;
 }
 
-/* Плашка «сделано с помощью VoiceIDE». */
+/* Строка выходных данных: имя инструмента у одного края, издание у другого. */
+.foot-stamp {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+  margin: 1.15rem 0 0;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--bg2);
+  font-family: var(--font-mono);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+}
+
 .made-with {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.35rem;
-  margin: 0.9rem 0 0;
-  padding: 0.4rem 0.75rem;
-  border: 1px solid var(--bg3);
-  border-radius: 999px;
-  color: var(--muted);
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-}
-
-.made-with a {
-  color: var(--fg0);
+  align-items: center;
+  gap: 0.45rem;
+  color: var(--fg1);
   text-decoration-color: var(--bg4);
   text-underline-offset: 3px;
 }
 
-.made-with a:hover {
+/* Клеймо автора: та же оранжевая плашка, что и в шапке, только в миниатюре. */
+.made-with::before {
+  content: "";
+  width: 0.6rem;
+  height: 0.6rem;
+  border: 1.5px solid var(--orange);
+  border-radius: 3px;
+}
+
+.made-with:hover {
   color: var(--orange);
   text-decoration-color: var(--orange);
 }
 
-/* Barely-there version stamp so releases are traceable in the wild. */
+/* Издание: тихая отметка, по которой можно узнать версию сборки. */
 .app-version {
-  margin: 0.7rem 0 0;
-  color: var(--bg4);
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  letter-spacing: 0.06em;
+  color: var(--muted);
+  letter-spacing: 0.08em;
 }
 
 .app-version span::before {
