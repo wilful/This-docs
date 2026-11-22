@@ -75,6 +75,29 @@ npm run preview   # preview the build
 > case the app code is still valid — verify JS with `node --check` and review
 > CSS by hand. Do not attempt to bypass TLS or install system packages.
 
+## Data backup (export / import)
+
+The tools menu (`⋮` in the masthead) can dump **all** locally stored data to a
+single JSON file and load it back on another device/browser. Everything the app
+persists lives under the `docbuilder:` localStorage prefix, so a backup is just
+a snapshot of that slice (saved documents, drafts, saved parties). Keep new
+storage keys under that prefix or they will not travel with the backup.
+Import merges documents by id and parties by value (no duplicates); drafts are
+overwritten. Export/import logic is `exportAllData()` / `importAllData()` in
+`src/main.js`.
+
+## Versioning
+
+The app has one version, shown subtly in the footer (`<span id="app-version">`,
+filled from `APP_VERSION` in `src/main.js`) so a deployed copy can be traced.
+
+- `version` in `package.json` is the source of truth; mirror it in
+  `APP_VERSION` (`src/main.js`) and in `package-lock.json` (top-level and
+  `packages[""].version`).
+- **Bump the version on every commit** — patch for fixes, minor for features.
+- The backup file records the app version (`appVersion`) alongside the format
+  version (`version: 1`).
+
 ## Conventions
 
 - Keep behavior in `main.js`; do not split logic into new files unless asked.

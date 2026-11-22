@@ -527,6 +527,19 @@ h3 {
   text-decoration-color: var(--orange);
 }
 
+/* Barely-there version stamp so releases are traceable in the wild. */
+.app-version {
+  margin: 0.7rem 0 0;
+  color: var(--bg4);
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+
+.app-version span::before {
+  content: "v";
+}
+
 /* ---------------- editor ---------------- */
 
 .editor-screen {
