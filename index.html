@@ -222,26 +222,28 @@
         </details>
 
         <footer class="site-foot">
-          <p>
+          <p class="foot-note">
             Документы формируются прямо в браузере: текст не отправляется на сервер и остаётся на
             вашем устройстве.
           </p>
+
           <nav class="foot-links" aria-label="Шаблоны документов">
             <a href="#" data-tpl="car-contract">Договор купли-продажи автомобиля</a>
             <a href="#" data-tpl="rent-contract">Договор аренды жилого помещения</a>
           </nav>
+
           <p class="fine">
             Набор текста выводится шрифтами PT Serif, PT Sans и PT Mono. PDF собирается Typst,
             скомпилированным в WebAssembly. Черновики, версии документов и сохранённые стороны
             хранятся в localStorage браузера.
           </p>
-          <p class="made-with">
-            Сайт сделан с помощью
-            <a href="https://voiceide.ru" rel="noopener">VoiceIDE</a>
-          </p>
-          <p class="app-version" title="Версия приложения">
-            <span id="app-version">0.2.0</span>
-          </p>
+
+          <div class="foot-stamp">
+            <a class="made-with" href="https://voiceide.ru" rel="noopener">Сделано в VoiceIDE</a>
+            <span class="app-version" title="Версия приложения">
+              <span id="app-version">0.2.1</span>
+            </span>
+          </div>
         </footer>
       </section>
 
