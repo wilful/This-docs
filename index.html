@@ -155,6 +155,29 @@
                 </svg>
                 <span>Начать заново</span>
               </button>
+              <button id="export-data" type="button" class="tool-item">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 3v12" />
+                  <path d="M7 10l5 5 5-5" />
+                  <path d="M5 21h14" />
+                </svg>
+                <span>Выгрузить данные в файл</span>
+              </button>
+              <button id="import-data" type="button" class="tool-item">
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M12 21V9" />
+                  <path d="M7 14l5-5 5 5" />
+                  <path d="M5 3h14" />
+                </svg>
+                <span>Загрузить данные из файла</span>
+              </button>
+              <input
+                id="import-file"
+                type="file"
+                accept="application/json,.json"
+                aria-label="Файл с сохранёнными данными"
+                hidden
+              />
               <button id="clear-data" type="button" class="tool-item destructive">
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path d="M4 7h16M10 11v6m4-6v6M5 7l1 13h12l1-13M9 7V4h6v3" />
