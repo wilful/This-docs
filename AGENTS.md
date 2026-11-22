@@ -98,6 +98,22 @@ filled from `APP_VERSION` in `src/main.js`) so a deployed copy can be traced.
 - The backup file records the app version (`appVersion`) alongside the format
   version (`version: 1`).
 
+## Encoding (important)
+
+`index.html` is served as-is, so it is kept **100% ASCII**: Cyrillic and
+typographic characters are written as numeric character references
+(`&#x41A;`), and the JSON-LD block uses `\uXXXX` escapes. A charset declared by
+the web server or a preview proxy in a `Content-Type` header beats
+`<meta charset>`, which is what turns Russian text into mojibake in a preview;
+character references survive any declared charset, so the page stays readable.
+
+- When editing `index.html`, write non-ASCII characters as references
+  (`&#x41A;` = А). Everything else — app strings, schemas, `.typ` templates —
+  stays plain UTF-8; JS modules are always decoded as UTF-8, so they need no
+  escaping.
+- `@charset "UTF-8";` must stay the first line of `src/style.css`: for CSS that
+  rule wins over the response headers.
+
 ## Conventions
 
 - Keep behavior in `main.js`; do not split logic into new files unless asked.
