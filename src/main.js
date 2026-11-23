@@ -24,7 +24,7 @@ const PARTY_PREFIX = "docbuilder:parties:";
 
 // Version of the app, shown quietly in the footer. Bump it together with
 // `version` in package.json on every commit (see AGENTS.md → Versioning).
-const APP_VERSION = "0.2.2";
+const APP_VERSION = "0.3.0";
 
 const els = {
   tpl: document.getElementById("template"),
@@ -41,6 +41,7 @@ const els = {
   back: document.getElementById("back"),
   next: document.getElementById("next"),
   save: document.getElementById("save"),
+  sendSample: document.getElementById("send-sample"),
   home: document.getElementById("home"),
   restart: document.getElementById("restart"),
   clearData: document.getElementById("clear-data"),
@@ -145,6 +146,16 @@ function loadDocById(id) {
   return loadDocs().find((d) => d.id === id);
 }
 
+// One place where a Blob is handed to the browser as a download.
+function downloadBlob(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
 function renderSavedDocs() {
   const body = document.getElementById("docs-body");
   if (!body) return;
@@ -237,10 +248,13 @@ function renderTemplateCards() {
   els.templateCards.innerHTML = "";
   for (const tpl of templates) {
     const draft = loadDraft(tpl);
-    const card = document.createElement("button");
-    card.type = "button";
+    const card = document.createElement("div");
     card.className = "template-card";
-    card.setAttribute(
+
+    const main = document.createElement("button");
+    main.type = "button";
+    main.className = "template-card-main";
+    main.setAttribute(
       "aria-label",
       `${tpl.schema.name}${draft ? ", продолжить черновик" : ", начать заполнение"}`
     );
@@ -270,8 +284,19 @@ function renderTemplateCards() {
     arrow.textContent = "→";
     side.appendChild(arrow);
 
-    card.append(copy, side);
-    card.addEventListener("click", () => openTemplate(tpl));
+    main.append(copy, side);
+    main.addEventListener("click", () => openTemplate(tpl));
+
+    const footer = document.createElement("div");
+    footer.className = "template-card-actions";
+    const sample = document.createElement("button");
+    sample.type = "button";
+    sample.className = "btn-sm";
+    sample.textContent = "Отправить пример";
+    sample.addEventListener("click", () => sendSample(tpl, sample));
+    footer.appendChild(sample);
+
+    card.append(main, footer);
     els.templateCards.appendChild(card);
   }
 }
@@ -1037,6 +1062,10 @@ els.save.addEventListener("click", () => {
   setStatus("Документ сохранён в «Мои документы» (все версии).");
 });
 
+els.sendSample.addEventListener("click", () => {
+  sendSample(current, els.sendSample);
+});
+
 // ---- backup: export / import all locally stored data ----
 
 // Read back a stored value without assuming it is JSON.
@@ -1093,12 +1122,7 @@ function exportAllData() {
     entries,
   };
   const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = backupFilename();
-  a.click();
-  window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+  downloadBlob(blob, backupFilename());
   setStatus("Файл с сохранёнными данными скачан. Его можно загрузить на другом устройстве.");
 }
 
@@ -1347,7 +1371,9 @@ function typstDict(o, typeMap) {
   return `( ${parts.join(", ")} )`;
 }
 
-function buildSource(tpl, values) {
+// `specimen: true` marks a compiled example: templates that know the flag
+// render a small "образец" note, templates that do not simply ignore it.
+function buildSource(tpl, values, { specimen = false } = {}) {
   const fieldTypeMap = buildFieldTypeMap(tpl);
   if (isGrouped(tpl)) {
     const entries = getGroups(tpl).map((g) => {
@@ -1365,6 +1391,7 @@ function buildSource(tpl, values) {
       }
       return `  ${g.id}: ${val}`;
     });
+    if (specimen) entries.push("  _specimen: true");
     return `${tpl.typ}\n\n#doc(\n  data: (\n${entries.join(",\n")}\n  )\n)\n`;
   }
   // Legacy flat schema: named parameters.
@@ -1378,16 +1405,213 @@ function buildSource(tpl, values) {
   return `${tpl.typ}\n\n#doc(\n${args}\n)\n`;
 }
 
-function pdfFilename(tpl, values) {
+function pdfFilename(tpl, values, label = "") {
   const terms = values.terms || {};
   const date = ruDateDisplay(terms.date || todayISO());
   const vehicle = values.vehicle?.model?.trim();
   const subject = tpl.id === "car-contract" && vehicle ? ` — ${vehicle}` : "";
-  const raw = `${tpl.schema.name}${subject} — ${date}`;
+  const tag = label ? ` (${label})` : "";
+  const raw = `${tpl.schema.name}${subject}${tag} — ${date}`;
   return raw
     .replace(/[<>:"/\\|?*\u0000-\u001f]/g, "-")
     .replace(/\s+/g, " ")
     .replace(/[. ]+$/g, "") + ".pdf";
+}
+
+// ---- example ("образец") document: fill a template with sample data ----
+
+// Plausible values so any template can be shown filled in. Groups whose fields
+// include `fio` are treated as parties and filled from SAMPLE_PARTIES; every
+// other group falls back to its group entry, the field placeholder, then to a
+// type-appropriate default. A value may be a function, evaluated on use.
+const SAMPLE_PARTIES = [
+  {
+    fio: "Иванов Иван Иванович",
+    birthdate: "1990-05-14",
+    passport_series: "4509",
+    passport_number: "123456",
+    passport_issued: "ОВД Кировского района г. Москвы",
+    passport_code: "770-001",
+    passport_date: "2010-06-20",
+    address: "г. Москва, ул. Ленина, д. 10, кв. 5",
+    phone: "+7 (916) 123-45-67",
+  },
+  {
+    fio: "Петрова Мария Сергеевна",
+    birthdate: "1985-11-02",
+    passport_series: "5011",
+    passport_number: "654321",
+    passport_issued: "ОУФМС России по г. Санкт-Петербургу",
+    passport_code: "780-002",
+    passport_date: "2012-03-15",
+    address: "г. Санкт-Петербург, Невский проспект, д. 20, кв. 7",
+    phone: "+7 (921) 987-65-43",
+  },
+];
+
+const SAMPLE_GROUPS = {
+  vehicle: {
+    plate: "А123ВС 77",
+    vin: "XTA210990Y1234567",
+    model: "Lada Vesta",
+    type: "легковой автомобиль",
+    category: "B",
+    year: "2020",
+    engine: "21179, 1234567",
+    chassis: "отсутствует",
+    body: "1234567890",
+    color: "белый",
+    power: "106 кВт / 143 л. с.",
+    displacement: "1774",
+    eco_class: "Евро-5",
+    max_mass: "1700",
+    individual_features: "отсутствуют",
+    pts: "77 ТС 123456",
+    pts_issued: "ООО «Авто-Сервис», 12.01.2020",
+    sts: "77 ТС 654321",
+    sts_issued: "ОГИБДД УМВД России по г. Москве, 15.01.2020",
+  },
+  housing: {
+    housing_type: "Квартира",
+    address: "г. Санкт-Петербург, Невский проспект, д. 20, кв. 7",
+    area: "54,3",
+    living_area: "38,1",
+    rooms: "2",
+    floor: "5 из 9",
+    cadastral: "78:31:0001234:56",
+    ownership: "выписка из ЕГРН от 01.01.2024",
+    encumbrances: "Отсутствуют",
+  },
+  terms: {
+    place: "Москва",
+    date: todayISO,
+    price: "1500000",
+    price_words: "один миллион пятьсот тысяч рублей 00 копеек",
+    start_date: todayISO,
+    end_date: () => isoFromToday(330),
+    notice_days: "30",
+    rent: "40000",
+    rent_words: "сорок тысяч рублей 00 копеек",
+    deposit: "40000",
+    payment_terms: "не позднее 5-го числа каждого месяца, наличными или переводом на карту",
+    utilities: "коммунальные платежи включены в арендную плату, кроме электроэнергии",
+    condition: "Помещение в удовлетворительном состоянии, выполнен косметический ремонт",
+    property: "диван, шкаф, стол, стулья, холодильник, стиральная машина, плита",
+    residents: "Отсутствуют",
+    pets: "Не допускаются",
+    repairs: "текущий ремонт — за счёт Арендатора; перепланировка — только по письменному согласию Арендодателя",
+    additional: "Арендатор освобождает Помещение и снимается с учёта не позднее 14 дней после окончания аренды",
+    appendices: "акт приёма-передачи Помещения, опись имущества",
+  },
+};
+
+// Per-template corrections where a shared group needs its own wording.
+const SAMPLE_OVERRIDES = {
+  "rent-contract": { terms: { place: "Санкт-Петербург" } },
+};
+
+// Today + N days as YYYY-MM-DD.
+function isoFromToday(days) {
+  const d = new Date();
+  d.setDate(d.getDate() + days);
+  const p = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+}
+
+function isPartyGroup(g) {
+  return (g.fields || []).some((f) => f.key === "fio");
+}
+
+// First value that is actually filled in (skips undefined, null and "").
+function firstFilled(...values) {
+  for (const v of values) if (v !== undefined && v !== null && v !== "") return v;
+  return "";
+}
+
+function sampleDefault(f) {
+  if (f.type === "select") return (f.options || [])[0] || "";
+  if (f.type === "date") return todayISO();
+  return "";
+}
+
+// Sample values for any template, shaped like emptyData(): a list of parties
+// for repeatable groups, a dictionary otherwise.
+function sampleData(tpl) {
+  const out = {};
+  let partyIndex = 0;
+  for (const g of getGroups(tpl)) {
+    const overrides = (SAMPLE_OVERRIDES[tpl.id] || {})[g.id] || {};
+    const byGroup = SAMPLE_GROUPS[g.id] || {};
+    const party = isPartyGroup(g) ? SAMPLE_PARTIES[partyIndex++ % SAMPLE_PARTIES.length] : {};
+    const valueOf = (f) => {
+      const v = firstFilled(
+        overrides[f.key],
+        byGroup[f.key],
+        party[f.key],
+        f.placeholder,
+        sampleDefault(f)
+      );
+      return typeof v === "function" ? v() : v;
+    };
+    const dict = Object.fromEntries(g.fields.map((f) => [f.key, valueOf(f)]));
+    out[g.id] = g.repeatable ? [dict] : dict;
+  }
+  return out;
+}
+
+function canShareFile(file) {
+  try {
+    return !!(
+      file &&
+      navigator.canShare &&
+      navigator.share &&
+      navigator.canShare({ files: [file] })
+    );
+  } catch {
+    return false;
+  }
+}
+
+// Compile a filled example of `tpl` and offer it for preliminary review: the
+// native share sheet when the browser can send files, a plain download when
+// it cannot (or when sharing fails).
+async function sendSample(tpl, button) {
+  const values = sampleData(tpl);
+  const source = buildSource(tpl, values, { specimen: true });
+  const filename = pdfFilename(tpl, values, "образец");
+  if (button) button.disabled = true;
+  setStatus("Собираем пример договора…");
+  try {
+    const pdf = await $typst.pdf({ mainContent: source });
+    const blob = new Blob([pdf], { type: "application/pdf" });
+    const file = new File([blob], filename, { type: "application/pdf" });
+    if (canShareFile(file)) {
+      try {
+        await navigator.share({
+          files: [file],
+          title: `Образец: ${tpl.schema.name}`,
+          text: `Пример заполненного документа «${tpl.schema.name}» — на предварительное ознакомление.`,
+        });
+        setStatus("Пример отправлен на предварительное ознакомление.");
+        return;
+      } catch (e) {
+        if (e && e.name === "AbortError") {
+          setStatus("Отправка отменена — пример можно собрать заново.");
+          return;
+        }
+        // Sharing is unavailable for another reason: fall back to a download.
+      }
+    }
+    downloadBlob(blob, filename);
+    setStatus("Пример готов и скачан — отправьте файл в мессенджере, почте или облаке.");
+  } catch (e) {
+    console.error(e);
+    console.error("[typst source]\n" + source);
+    window.__lastTypstSource = source;
+    setStatus("Не удалось собрать пример — проверьте консоль (F12).", true);
+  } finally {
+    if (button) button.disabled = false;
+  }
 }
 
 // ---- PDF export ----
@@ -1408,12 +1632,7 @@ async function exportPdf() {
   try {
     const pdf = await $typst.pdf({ mainContent: source });
     const blob = new Blob([pdf], { type: "application/pdf" });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = pdfFilename(current, data);
-    a.click();
-    window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+    downloadBlob(blob, pdfFilename(current, data));
     addDoc(current, data);
     setStatus("Готово — PDF скачан и сохранён в «Мои документы».");
   } catch (e) {

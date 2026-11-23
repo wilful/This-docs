@@ -40,6 +40,10 @@
   let terms = data.terms
 
   align(center)[ДОГОВОР АРЕНДЫ ЖИЛОГО ПОМЕЩЕНИЯ]
+  if data.at("_specimen", default: false) {
+    v(0.15em)
+    align(center, text(size: 8pt, fill: rgb("888888"))[ОБРАЗЕЦ ЗАПОЛНЕНИЯ — сформирован для предварительного ознакомления. Не является подписанным документом.])
+  }
   v(0.45em)
   grid(columns: (1fr, 1fr), gutter: 1em)[г. #val(terms.at("place", default: ""))][#align(right)[#val(terms.at("date", default: "")) г.]]
   v(0.5em)
