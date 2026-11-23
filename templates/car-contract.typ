@@ -24,6 +24,10 @@
   let heading(title) = align(center, strong(title))
 
   align(center, strong(text(size: 13pt)[ДОГОВОР КУПЛИ-ПРОДАЖИ ТРАНСПОРТНОГО СРЕДСТВА]))
+  if data.at("_specimen", default: false) {
+    v(0.15em)
+    align(center, text(size: 8.5pt, fill: rgb("888888"))[ОБРАЗЕЦ ЗАПОЛНЕНИЯ — сформирован для предварительного ознакомления. Не является подписанным документом.])
+  }
   v(0.6em)
 
   grid(columns: (1fr, 1fr))[
